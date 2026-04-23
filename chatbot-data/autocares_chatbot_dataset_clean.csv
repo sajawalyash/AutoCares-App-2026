@@ -1,0 +1,31 @@
+question,intent,answer
+Why did my bike engine suddenly stop while riding?,engine_stop,"Check fuel level, battery connection, and spark plug. Restart after cooling."
+My bike is not starting. What should I check first?,bike_not_starting,"Ensure fuel is available, ignition is ON, and battery connections are secure."
+My bike tire is punctured. What should I do?,tire_puncture,Stop safely and request puncture repair through the Autocares app.
+Why is my bike engine overheating?,engine_overheating,Allow engine to cool and check engine oil level.
+My car battery is dead. How can I start my car?,dead_battery,Try jump-starting the battery or request battery assistance.
+My scooter is making unusual engine noise.,engine_noise,Check engine oil and inspect engine components.
+My bike lights are not working.,electrical_issue,"Inspect battery, fuse, and wiring connections."
+My car tire pressure is low. Can I drive?,low_tire_pressure,Drive slowly to a service station or inflate the tire.
+Why does my bike produce white smoke?,smoke_issue,White smoke may indicate oil burning or engine leakage.
+My scooter battery keeps draining quickly.,battery_drain,Battery may be weak or wiring faulty; inspection is recommended.
+My car engine does not respond when I press the accelerator.,accelerator_issue,Fuel supply or throttle issues may be the cause.
+Why is my bike vibrating excessively?,vibration_issue,Loose engine parts or tire imbalance may cause vibration.
+My car is overheating in traffic.,car_overheating,Stop vehicle and allow engine to cool down.
+My scooter self-start is not working.,self_start_issue,Battery or starter motor may need inspection.
+My car makes a clicking sound when starting.,starter_issue,Weak battery or starter motor issue.
+My bike chain is making noise.,chain_problem,Chain may require lubrication or tightening.
+My car brakes feel weak.,brake_issue,Brake pads or brake fluid may need replacement.
+My bike speed suddenly dropped.,speed_drop,Fuel blockage or engine malfunction may occur.
+My scooter stopped after heavy rain.,water_damage,Water may have entered engine or electrical system.
+My car engine shakes while idling.,engine_idle_issue,Dirty injectors or engine misfire may occur.
+My bike smells like burning.,burning_smell,Overheated components or oil leakage may cause burning smell.
+My car AC stopped working.,ac_issue,AC refrigerant leakage or compressor problem.
+My scooter takes too long to start.,slow_start,Battery weakness or fuel blockage may cause delay.
+My bike brakes make noise.,brake_noise,Worn brake pads may cause noise.
+My car steering feels heavy.,steering_issue,Low power steering fluid may be the issue.
+My bike stalls at traffic signals.,engine_stall,Incorrect idle speed or carburetor problem.
+My scooter produces black smoke.,black_smoke,Air filter blockage may cause black smoke.
+My car fuel consumption increased suddenly.,high_fuel_consumption,Dirty air filters or poor tuning may increase fuel use.
+My bike headlight becomes dim.,dim_headlight,Weak battery or alternator issue.
+My car makes noise when braking.,brake_sound,Brake pads or discs may require inspection.

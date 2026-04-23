@@ -1,0 +1,154 @@
+'use client'
+
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { MessageCircle, Wrench, MapPin, Phone, AlertCircle, Zap, Gauge } from 'lucide-react'
+
+export default function Home() {
+  const router = useRouter()
+
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-purple-50 to-purple-50">
+      {/* Header */}
+      <header className="sticky top-0 z-40 bg-white shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 py-4 sm:px-6 sm:py-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/autocares-logo.png"
+              alt="AutoCares Logo"
+              width={58}
+              height={58}
+              priority
+              className="w-12 h-12 rounded-lg"
+            />
+            <h1 className="text-2xl font-bold text-gray-900">AutoCares</h1>
+          </div>
+          <Button 
+            onClick={() => router.push('/auth/login')}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
+            Login
+          </Button>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
+        <div className="grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              Help is Just a Click Away
+            </h2>
+            <p className="text-lg text-gray-600 mb-8">
+              Get instant roadside assistance and AI-powered vehicle troubleshooting. Available 24/7 for cars, bikes, and scooters.
+            </p>
+            <div className="flex gap-4 flex-col sm:flex-row">
+              <Button 
+                onClick={() => router.push('/auth/register')}
+                size="lg"
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                Get Started
+              </Button>
+              <Button 
+                onClick={() => router.push('/auth/login')}
+                size="lg"
+                variant="outline"
+              >
+                Login
+              </Button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="p-6 bg-white hover:shadow-lg transition-shadow">
+              <MessageCircle className="w-8 h-8 text-purple-500 mb-3" />
+              <h3 className="font-semibold text-gray-900">AI Chatbot</h3>
+              <p className="text-sm text-gray-600 mt-2">Get instant troubleshooting tips</p>
+            </Card>
+            <Card className="p-6 bg-white hover:shadow-lg transition-shadow">
+              <Wrench className="w-8 h-8 text-purple-600 mb-3" />
+              <h3 className="font-semibold text-gray-900">Mechanics</h3>
+              <p className="text-sm text-gray-600 mt-2">Find nearby verified mechanics</p>
+            </Card>
+            <Card className="p-6 bg-white hover:shadow-lg transition-shadow">
+              <Gauge className="w-8 h-8 text-green-600 mb-3" />
+              <h3 className="font-semibold text-gray-900">OBD Diagnostics</h3>
+              <p className="text-sm text-gray-600 mt-2">Real-time vehicle health monitoring</p>
+            </Card>
+            <Card className="p-6 bg-white hover:shadow-lg transition-shadow">
+              <Phone className="w-8 h-8 text-purple-600 mb-3" />
+              <h3 className="font-semibold text-gray-900">SOS Button</h3>
+              <p className="text-sm text-gray-600 mt-2">Emergency assistance at your fingertips</p>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="bg-white py-12 sm:py-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-12">
+            Why Choose AutoCares?
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card className="p-8 border-0 shadow-md hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                <Zap className="w-6 h-6 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Fast Response</h3>
+              <p className="text-gray-600">
+                Get connected with mechanics in minutes, not hours. Real-time tracking keeps you informed.
+              </p>
+            </Card>
+            <Card className="p-8 border-0 shadow-md hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                <MessageCircle className="w-6 h-6 text-purple-500" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Smart AI Assistant</h3>
+              <p className="text-gray-600">
+                Our AI chatbot trained on vehicle data and OBD diagnostics helps diagnose issues before calling a mechanic.
+              </p>
+            </Card>
+            <Card className="p-8 border-0 shadow-md hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <Gauge className="w-6 h-6 text-green-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">OBD-II Monitoring</h3>
+              <p className="text-gray-600">
+                Connect your vehicle via Bluetooth OBD scanner for real-time diagnostics, health scores, and early issue detection.
+              </p>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-gradient-to-r from-purple-600 to-purple-500 py-12 sm:py-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+            Ready to Get Help?
+          </h2>
+          <p className="text-xl text-purple-50 mb-8">
+            Join thousands of drivers who trust AutoCares for roadside assistance
+          </p>
+          <Button 
+            onClick={() => router.push('/auth/signup')}
+            size="lg"
+            className="bg-white text-purple-600 hover:bg-gray-100 font-semibold"
+          >
+            Sign Up Now
+          </Button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-400 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+          <p>&copy; 2024 AutoCares. All rights reserved.</p>
+        </div>
+      </footer>
+    </main>
+  )
+}
