@@ -4,6 +4,15 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Hide browser extension elements */
+[style*="position: fixed"][style*="left: 24px"][style*="bottom: 24px"],
+[style*="bottom: 24px"][style*="left: 24px"],
+svg[id*="neon"],
+div[data-neon],
+.neon-widget {
+  display: none !important;
+}
+
 :root {
   --background: #F9FAFB;
   --foreground: #111827;

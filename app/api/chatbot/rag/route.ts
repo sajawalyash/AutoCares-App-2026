@@ -1,13 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenAI } from '@google/genai'
 import { getLocalAssistantResponse } from '@/lib/chatbot-engine'
-import { CHATBOT_KNOWLEDGE } from '@/lib/chatbot-knowledge'
+import { CHATBOT_KNOWLEDGE, type KnowledgeItem } from '@/lib/chatbot-knowledge'
 
 const SYSTEM_PROMPT = `You are AutoCares AI Assistant.
 Provide clear, practical, and safety-first vehicle guidance.
 Use the provided knowledge when available to answer the user's query.
 If the issue sounds urgent or unsafe, advise roadside assistance immediately.
 Keep answers short and actionable.`
+
+function getRelevantKnowledge(query: string, items: KnowledgeItem[], topN = 3) {
+  const normalizedQuery = query.toLowerCase()
+  const queryTokens = Array.from(new Set(normalizedQuery.match(/\w+/g) || []))
+
+  return [...items]
+    .map((item) => {
+      const combined = `${item.intent} ${item.question} ${item.answer}`.toLowerCase()
+      const score = queryTokens.reduce(
+        (count, token) => (combined.includes(token) ? count + 1 : count),
+        0,
+      )
+      return { item, score }
+    })
+    .sort((a, b) => b.score - a.score)
+    .filter((entry) => entry.score > 0)
+    .slice(0, topN)
+    .map((entry) => entry.item)
+}
 
 export async function POST(request: NextRequest) {
   let userMessage = ''
@@ -32,8 +51,8 @@ export async function POST(request: NextRequest) {
 
     const ai = new GoogleGenAI({ apiKey: geminiApiKey })
 
-    // Inject the entire local knowledge base directly into the prompt context
-    const context = CHATBOT_KNOWLEDGE
+    const relevantItems = getRelevantKnowledge(message, CHATBOT_KNOWLEDGE, 4)
+    const context = (relevantItems.length ? relevantItems : CHATBOT_KNOWLEDGE)
       .map((item, index) => {
         return `#${index + 1}
 Intent: ${item.intent}

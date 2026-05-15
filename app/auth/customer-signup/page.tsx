@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card'
 import { Alert } from '@/components/ui/alert'
 import { Spinner } from '@/components/ui/spinner'
 import { customerSignupSchema, type CustomerSignupInput } from '@/lib/validation/auth-schemas'
+import { parseJsonResponse } from '@/lib/utils'
 import { ArrowLeft, AlertCircle, CheckCircle } from 'lucide-react'
 
 export default function CustomerSignUp() {
@@ -53,10 +54,14 @@ export default function CustomerSignUp() {
         }),
       })
 
-      const result = await response.json()
+      const result = await parseJsonResponse(response)
 
       if (!response.ok) {
-        setErrorMessage(result.error || 'Failed to create account. Please try again.')
+        const errorText =
+          typeof result === 'object'
+            ? result?.error || result?.message || 'Failed to create account. Please try again.'
+            : String(result || 'Failed to create account. Please try again.')
+        setErrorMessage(errorText)
         return
       }
 

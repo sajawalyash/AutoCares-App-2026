@@ -10,16 +10,28 @@ export function createClient() {
 }
 
 export async function getSessionOrClearToken() {
-  const { data, error } = await supabase.auth.getSession()
+  try {
+    const { data, error } = await supabase.auth.getSession()
 
-  if (error?.message?.includes('Invalid Refresh Token')) {
-    await supabase.auth.signOut()
-    return null
-  }
+    if (error?.message?.includes('Invalid Refresh Token')) {
+      await supabase.auth.signOut()
+      return null
+    }
 
-  if (error) {
+    if (error) {
+      throw error
+    }
+
+    return data.session
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : String(error)
+
+    if (message.includes('Invalid Refresh Token')) {
+      await supabase.auth.signOut()
+      return null
+    }
+
     throw error
   }
-
-  return data.session
 }

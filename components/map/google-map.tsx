@@ -97,6 +97,11 @@ function CustomGoogleMapComponent({
       options={{
         disableDefaultUI: true,
         zoomControl: true,
+        rotateControl: false,
+        fullscreenControl: false,
+        mapTypeControl: false,
+        scaleControl: false,
+        streetViewControl: false,
         styles: [
           {
             featureType: "poi",

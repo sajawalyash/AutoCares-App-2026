@@ -44,8 +44,7 @@ export default function Chatbot() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSendMessage = async () => {
     if (!input.trim() || loading) return
 
     const messageText = input.trim()
@@ -159,11 +158,12 @@ export default function Chatbot() {
       {/* Input Area */}
       <div className="bg-white border-t border-gray-200 sticky bottom-0">
         <div className="max-w-4xl mx-auto p-4">
-          <form onSubmit={handleSendMessage} className="flex gap-3">
+          <form onSubmit={(e) => { e.preventDefault(); void handleSendMessage(); }} className="flex gap-3">
             <Input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              autoComplete="off"
               placeholder="Describe your vehicle issue..."
               className="flex-1"
               disabled={loading}
