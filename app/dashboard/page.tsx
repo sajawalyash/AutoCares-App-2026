@@ -279,7 +279,7 @@ export default function Dashboard() {
             <span className="text-xs mt-1 block">Mechanics</span>
           </button>
           <button
-            onClick={() => router.push('/profile')}
+            onClick={() => setIsEditModalOpen(true)}
             className="flex-1 py-3 text-center text-gray-600"
           >
             <Settings className="w-5 h-5 mx-auto" />

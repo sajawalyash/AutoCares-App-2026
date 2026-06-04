@@ -432,7 +432,7 @@ export default function MechanicDashboard() {
             <span className="text-xs mt-1 block">History</span>
           </button>
           <button
-            onClick={() => router.push('/profile')}
+            onClick={() => setIsEditModalOpen(true)}
             className="flex-1 py-3 text-center text-gray-600"
           >
             <User className="w-5 h-5 mx-auto" />
