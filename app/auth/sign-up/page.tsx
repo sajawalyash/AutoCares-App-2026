@@ -83,7 +83,7 @@ export default function Page() {
                     <Input
                       id="fullName"
                       type="text"
-                      placeholder="John Doe"
+                      placeholder="Sarim Ali"
                       required
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
@@ -105,7 +105,7 @@ export default function Page() {
                     <Input
                       id="phone"
                       type="tel"
-                      placeholder="+1 (555) 000-0000"
+                      placeholder="+92317XXXXXXX"
                       required
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}

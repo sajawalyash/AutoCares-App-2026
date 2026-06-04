@@ -131,7 +131,7 @@ export default function MechanicSignUp() {
                 </label>
                 <Input
                   {...register('firstName')}
-                  placeholder="John"
+                  placeholder="Sarim"
                   disabled={isLoading}
                 />
                 {errors.firstName && (
@@ -145,7 +145,7 @@ export default function MechanicSignUp() {
                 </label>
                 <Input
                   {...register('lastName')}
-                  placeholder="Smith"
+                  placeholder="Ali"
                   disabled={isLoading}
                 />
                 {errors.lastName && (
@@ -190,7 +190,7 @@ export default function MechanicSignUp() {
               <Input
                 {...register('phoneNumber')}
                 type="tel"
-                placeholder="(555) 123-4567"
+                placeholder="+92317XXXXXXX"
                 disabled={isLoading}
               />
               {errors.phoneNumber && (
@@ -205,7 +205,7 @@ export default function MechanicSignUp() {
                 </label>
                 <Input
                   {...register('city')}
-                  placeholder="New York"
+                  placeholder="Karachi"
                   disabled={isLoading}
                 />
               </div>
@@ -216,7 +216,7 @@ export default function MechanicSignUp() {
                 </label>
                 <Input
                   {...register('state')}
-                  placeholder="NY"
+                  placeholder="Sindh"
                   disabled={isLoading}
                 />
               </div>

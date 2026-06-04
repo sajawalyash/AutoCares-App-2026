@@ -20,6 +20,7 @@ import {
   History,
   User,
 } from 'lucide-react'
+import { EditProfileModal } from '@/components/edit-profile-modal'
 
 type ServiceRequestStatus = 'pending' | 'assigned' | 'on_way' | 'completed'
 
@@ -52,6 +53,14 @@ export default function MechanicDashboard() {
   })
   const [dataError, setDataError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+
+  const loadUser = async () => {
+    const session = await getSessionOrClearToken()
+    if (session) {
+      setUser(session.user)
+    }
+  }
 
   useEffect(() => {
     const startOfTodayIso = () => {
@@ -235,16 +244,33 @@ export default function MechanicDashboard() {
               <p className="text-xs text-gray-500">{mechanicTitle}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition hidden sm:block">
-              <Settings className="w-5 h-5 text-gray-600" />
-            </button>
+          <div className="flex items-center gap-4">
+            {user?.user_metadata?.avatar_url ? (
+              <img
+                src={user.user_metadata.avatar_url}
+                alt="Profile"
+                className="w-10 h-10 rounded-full object-cover border border-gray-200"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-bold border border-purple-200">
+                {firstName?.[0]?.toUpperCase() || 'M'}
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsEditModalOpen(true)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition hidden sm:flex items-center gap-2 text-sm font-medium text-gray-600"
+              >
+                <Settings className="w-5 h-5" />
+                Edit Profile
+              </button>
             <button
               onClick={handleLogout}
               className="p-2 hover:bg-gray-100 rounded-lg transition"
             >
               <LogOut className="w-5 h-5 text-gray-600" />
             </button>
+            </div>
           </div>
         </div>
       </header>
@@ -293,7 +319,7 @@ export default function MechanicDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Today's Earnings</p>
-                <p className="text-2xl font-bold text-gray-900">${stats.todaysEarnings.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-gray-900">Rs {stats.todaysEarnings.toFixed(2)}</p>
               </div>
               <DollarSign className="w-8 h-8 text-purple-600" />
             </div>
@@ -316,11 +342,11 @@ export default function MechanicDashboard() {
           <Link href="/track-service">
             <Card className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 text-white hover:shadow-lg transition-shadow cursor-pointer h-full">
               <Wrench className="w-12 h-12 mb-4" />
-              <h3 className="text-2xl font-bold mb-2">Active Service Queue</h3>
+              <h3 className="text-2xl font-bold mb-2">Mechanic Service</h3>
               <p className="text-purple-100">
                 View and manage live roadside assistance requests from nearby drivers.
               </p>
-              <div className="mt-4 text-sm">Open Queue →</div>
+              <div className="mt-4 text-sm">Open Service →</div>
             </Card>
           </Link>
 
@@ -359,16 +385,14 @@ export default function MechanicDashboard() {
             </Card>
           </Link>
 
-          <Link href="/profile">
-            <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
-              <User className="w-8 h-8 text-purple-600 mb-3" />
-              <h3 className="font-bold text-gray-900 mb-2">Business Profile</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Update business details, availability, and contact preferences.
-              </p>
-              <div className="text-purple-600 text-sm font-medium">Manage Profile →</div>
-            </Card>
-          </Link>
+          <Card onClick={() => setIsEditModalOpen(true)} className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <User className="w-8 h-8 text-purple-600 mb-3" />
+            <h3 className="font-bold text-gray-900 mb-2">Business Profile</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Update business details, availability, and contact preferences.
+            </p>
+            <div className="text-purple-600 text-sm font-medium">Manage Profile →</div>
+          </Card>
         </div>
 
         <Card className="p-6 mt-8 border-purple-200 bg-purple-50">
@@ -416,6 +440,16 @@ export default function MechanicDashboard() {
           </button>
         </div>
       </nav>
+
+      {user && (
+        <EditProfileModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          user={user}
+          userType="mechanic"
+          onSuccess={loadUser}
+        />
+      )}
     </div>
   )
 }

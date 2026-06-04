@@ -99,7 +99,7 @@ export default function SignUp() {
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                placeholder="John Doe"
+                placeholder="Sarim Ali"
                 required
                 className="w-full"
               />
@@ -129,7 +129,7 @@ export default function SignUp() {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="+1 (555) 000-0000"
+                placeholder="+92317XXXXXXX"
                 required
                 className="w-full"
               />

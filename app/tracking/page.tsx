@@ -12,6 +12,8 @@ interface ServiceRequest {
   status: 'pending' | 'assigned' | 'on_way' | 'completed'
   mechanicName: string
   mechanicPhone: string
+  customerName: string
+  customerPhone: string
   estimatedTime: number
   location: string
   problem: string
@@ -24,6 +26,8 @@ const MOCK_REQUESTS: ServiceRequest[] = [
     status: 'on_way',
     mechanicName: "John's Auto Repair",
     mechanicPhone: '+1 (555) 123-4567',
+    customerName: 'Alice Smith',
+    customerPhone: '+1 (555) 987-6543',
     estimatedTime: 8,
     location: '123 Main St',
     problem: 'Engine won\'t start',
@@ -34,6 +38,8 @@ const MOCK_REQUESTS: ServiceRequest[] = [
     status: 'completed',
     mechanicName: 'Quick Fix Garage',
     mechanicPhone: '+1 (555) 234-5678',
+    customerName: 'Bob Johnson',
+    customerPhone: '+1 (555) 345-6789',
     estimatedTime: 15,
     location: '456 Oak Ave',
     problem: 'Flat tire repair',
@@ -108,8 +114,8 @@ export default function Tracking() {
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Track Service</h1>
-            <p className="text-sm text-gray-600">Monitor your service requests</p>
+            <h1 className="text-xl font-bold text-gray-900">{user?.user_metadata?.user_type === 'mechanic' ? 'Live Job Tracking' : 'Track Service'}</h1>
+            <p className="text-sm text-gray-600">{user?.user_metadata?.user_type === 'mechanic' ? 'Monitor route progress' : 'Monitor your service requests'}</p>
           </div>
         </div>
       </header>
@@ -127,12 +133,21 @@ export default function Tracking() {
             <p className="text-gray-600 mb-6">
               You don't have any active service requests at the moment.
             </p>
-            <Button
-              onClick={() => router.push('/assistance/request')}
-              className="bg-purple-600 hover:bg-purple-700"
-            >
-              Request Roadside Help
-            </Button>
+            {user?.user_metadata?.user_type === 'mechanic' ? (
+              <Button
+                onClick={() => router.push('/mechanic/dashboard')}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                Back to Dashboard
+              </Button>
+            ) : (
+              <Button
+                onClick={() => router.push('/assistance/request')}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                Request Roadside Help
+              </Button>
+            )}
           </Card>
         ) : (
           <div className="space-y-4">
@@ -185,10 +200,10 @@ export default function Tracking() {
                       {/* Mechanic Info */}
                       <div className="bg-gray-50 rounded-lg p-4">
                         <p className="text-sm text-gray-600 mb-2">
-                          Assigned Mechanic
+                          {user?.user_metadata?.user_type === 'mechanic' ? 'Customer' : 'Assigned Mechanic'}
                         </p>
                         <h4 className="font-bold text-gray-900 mb-2">
-                          {request.mechanicName}
+                          {user?.user_metadata?.user_type === 'mechanic' ? request.customerName : request.mechanicName}
                         </h4>
                         <div className="flex gap-2">
                           <Button
@@ -238,7 +253,7 @@ export default function Tracking() {
                             Cancel Request
                           </Button>
                           <Button className="flex-1 bg-purple-600 hover:bg-purple-700">
-                            Contact Mechanic
+                            {user?.user_metadata?.user_type === 'mechanic' ? 'Contact Customer' : 'Contact Mechanic'}
                           </Button>
                         </div>
                       )}
@@ -252,12 +267,21 @@ export default function Tracking() {
 
         {/* Request New Service Button */}
         <div className="mt-8 text-center">
-          <Button
-            onClick={() => router.push('/assistance/request')}
-            className="bg-purple-600 hover:bg-purple-700"
-          >
-            Request New Service
-          </Button>
+          {user?.user_metadata?.user_type === 'mechanic' ? (
+            <Button
+              onClick={() => router.push('/mechanic/dashboard')}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              Back to Dashboard
+            </Button>
+          ) : (
+            <Button
+              onClick={() => router.push('/assistance/request')}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              Request New Service
+            </Button>
+          )}
         </div>
       </div>
     </div>

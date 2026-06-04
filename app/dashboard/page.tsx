@@ -20,11 +20,20 @@ import {
   Home,
 } from 'lucide-react'
 import { OBDDashboardSummary } from '@/components/obd/obd-dashboard-summary'
+import { EditProfileModal } from '@/components/edit-profile-modal'
 
 export default function Dashboard() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+
+  const loadUser = async () => {
+    const session = await getSessionOrClearToken()
+    if (session) {
+      setUser(session.user)
+    }
+  }
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -84,16 +93,33 @@ export default function Dashboard() {
             />
             <h1 className="text-2xl font-bold text-gray-900">AutoCares</h1>
           </div>
-          <div className="flex items-center gap-2">
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition hidden sm:block">
-              <Settings className="w-5 h-5 text-gray-600" />
-            </button>
+          <div className="flex items-center gap-4">
+            {user?.user_metadata?.avatar_url ? (
+              <img
+                src={user.user_metadata.avatar_url}
+                alt="Profile"
+                className="w-10 h-10 rounded-full object-cover border border-gray-200"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-bold border border-purple-200">
+                {firstName?.[0]?.toUpperCase() || 'U'}
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsEditModalOpen(true)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition hidden sm:flex items-center gap-2 text-sm font-medium text-gray-600"
+              >
+                <Settings className="w-5 h-5" />
+                Edit Profile
+              </button>
             <button
               onClick={handleLogout}
               className="p-2 hover:bg-gray-100 rounded-lg transition"
             >
               <LogOut className="w-5 h-5 text-gray-600" />
             </button>
+            </div>
           </div>
         </div>
       </header>
@@ -217,16 +243,14 @@ export default function Dashboard() {
           </Link>
 
           {/* Profile */}
-          <Link href="/profile">
-            <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
-              <Settings className="w-8 h-8 text-gray-600 mb-3" />
-              <h3 className="font-bold text-gray-900 mb-2">My Profile</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Manage your account and vehicle info
-              </p>
-              <div className="text-gray-600 text-sm font-medium">Edit Profile →</div>
-            </Card>
-          </Link>
+          <Card onClick={() => setIsEditModalOpen(true)} className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <Settings className="w-8 h-8 text-gray-600 mb-3" />
+            <h3 className="font-bold text-gray-900 mb-2">My Profile</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Manage your account and vehicle info
+            </p>
+            <div className="text-gray-600 text-sm font-medium">Edit Profile →</div>
+          </Card>
         </div>
       </main>
 
@@ -263,6 +287,16 @@ export default function Dashboard() {
           </button>
         </div>
       </nav>
+      
+      {user && (
+        <EditProfileModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          user={user}
+          userType="customer"
+          onSuccess={loadUser}
+        />
+      )}
     </div>
   )
 }

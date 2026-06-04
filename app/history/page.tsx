@@ -1,24 +1,26 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { getSessionOrClearToken } from '@/lib/supabase/client'
 import { Card } from '@/components/ui/card'
-import { ArrowLeft, MapPin, Star, Calendar } from 'lucide-react'
+import { ArrowLeft, Star, Calendar } from 'lucide-react'
 
 interface ServiceRecord {
   id: string
   date: string
-  mechanic: string
+  name: string
   service: string
   rating: number
   cost: number
   duration: string
 }
 
-const MOCK_HISTORY: ServiceRecord[] = [
+const MOCK_CUSTOMER_HISTORY: ServiceRecord[] = [
   {
     id: '1',
     date: '2024-03-08',
-    mechanic: "John's Auto Repair",
+    name: "John's Auto Repair",
     service: 'Engine diagnostics',
     rating: 5,
     cost: 85,
@@ -27,7 +29,7 @@ const MOCK_HISTORY: ServiceRecord[] = [
   {
     id: '2',
     date: '2024-02-15',
-    mechanic: 'Quick Fix Garage',
+    name: 'Quick Fix Garage',
     service: 'Battery replacement',
     rating: 4,
     cost: 120,
@@ -36,7 +38,37 @@ const MOCK_HISTORY: ServiceRecord[] = [
   {
     id: '3',
     date: '2024-01-28',
-    mechanic: 'Premium Auto Service',
+    name: 'Premium Auto Service',
+    service: 'Oil change & filter',
+    rating: 5,
+    cost: 65,
+    duration: '30 mins',
+  },
+]
+
+const MOCK_MECHANIC_HISTORY: ServiceRecord[] = [
+  {
+    id: '1',
+    date: '2024-03-08',
+    name: "Alice Smith",
+    service: 'Engine diagnostics',
+    rating: 5,
+    cost: 85,
+    duration: '1 hour',
+  },
+  {
+    id: '2',
+    date: '2024-02-15',
+    name: 'Bob Johnson',
+    service: 'Battery replacement',
+    rating: 4,
+    cost: 120,
+    duration: '45 mins',
+  },
+  {
+    id: '3',
+    date: '2024-01-28',
+    name: 'Charlie Brown',
     service: 'Oil change & filter',
     rating: 5,
     cost: 65,
@@ -46,6 +78,29 @@ const MOCK_HISTORY: ServiceRecord[] = [
 
 export default function History() {
   const router = useRouter()
+  const [userType, setUserType] = useState<'customer' | 'mechanic'>('customer')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const session = await getSessionOrClearToken()
+      if (session) {
+        setUserType(session.user.user_metadata?.user_type || 'customer')
+      }
+      setLoading(false)
+    }
+    checkAuth()
+  }, [])
+
+  const historyData = userType === 'mechanic' ? MOCK_MECHANIC_HISTORY : MOCK_CUSTOMER_HISTORY
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-purple-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-purple-50">
@@ -65,11 +120,11 @@ export default function History() {
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="space-y-4">
-          {MOCK_HISTORY.map((record) => (
+          {historyData.map((record) => (
             <Card key={record.id} className="p-6 hover:shadow-lg transition-shadow">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="font-bold text-gray-900">{record.mechanic}</h3>
+                  <h3 className="font-bold text-gray-900">{record.name}</h3>
                   <p className="text-sm text-gray-600">{record.service}</p>
                 </div>
                 <div className="text-right">
@@ -85,7 +140,7 @@ export default function History() {
                       />
                     ))}
                   </div>
-                  <p className="font-semibold text-gray-900">${record.cost}</p>
+                  <p className="font-semibold text-gray-900">Rs {record.cost}</p>
                 </div>
               </div>
 

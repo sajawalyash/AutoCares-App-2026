@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { getSessionOrClearToken } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -18,6 +19,17 @@ export default function TrackServicePage() {
   const router = useRouter()
   const [currentStage, setCurrentStage] = useState(1) // on_the_way stage
   const [eta, setEta] = useState(12) // minutes
+  const [userType, setUserType] = useState<'customer' | 'mechanic'>('customer')
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const session = await getSessionOrClearToken()
+      if (session) {
+        setUserType(session.user.user_metadata?.user_type || 'customer')
+      }
+    }
+    checkAuth()
+  }, [])
 
   // Simulate ETA countdown
   useEffect(() => {
@@ -27,7 +39,13 @@ export default function TrackServicePage() {
     return () => clearInterval(interval)
   }, [])
 
-  const mechanic = {
+  const displayUser = userType === 'mechanic' ? {
+    name: 'Alice Smith',
+    phone: '+1 (555) 987-6543',
+    rating: 4.9,
+    vehicleInfo: 'White Toyota Camry',
+    plateNumber: 'ABC-1234'
+  } : {
     name: 'John\'s Auto Repair',
     phone: '+1 (555) 123-4567',
     rating: 4.8,
@@ -50,7 +68,9 @@ export default function TrackServicePage() {
           </Button>
           <div>
             <h1 className="text-xl font-bold text-gray-900">Track Service</h1>
-            <p className="text-sm text-gray-600">Real-time mechanic tracking</p>
+            <p className="text-sm text-gray-600">
+              {userType === 'mechanic' ? 'Real-time job tracking' : 'Real-time mechanic tracking'}
+            </p>
           </div>
         </div>
       </header>
@@ -105,7 +125,9 @@ export default function TrackServicePage() {
                     </p>
                     {isActive && (
                       <p className="text-sm text-gray-600 mt-1">
-                        Your mechanic is on the way to your location
+                        {userType === 'mechanic' 
+                          ? 'You are on the way to the customer\'s location' 
+                          : 'Your mechanic is on the way to your location'}
                       </p>
                     )}
                     {isCompleted && (
@@ -122,17 +144,21 @@ export default function TrackServicePage() {
 
         {/* Mechanic Info */}
         <Card className="p-6 sm:p-8 border-0 shadow-lg mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Mechanic Details</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-6">
+            {userType === 'mechanic' ? 'Customer Details' : 'Mechanic Details'}
+          </h2>
           
           <div className="space-y-4">
             <div className="flex items-start justify-between pb-4 border-b border-gray-200">
               <div>
-                <p className="text-sm text-gray-600 font-semibold uppercase mb-1">Business Name</p>
-                <p className="text-lg font-semibold text-gray-900">{mechanic.name}</p>
+                <p className="text-sm text-gray-600 font-semibold uppercase mb-1">
+                  {userType === 'mechanic' ? 'Name' : 'Business Name'}
+                </p>
+                <p className="text-lg font-semibold text-gray-900">{displayUser.name}</p>
               </div>
               <div className="text-right">
                 <p className="text-sm text-gray-600 font-semibold uppercase mb-1">Rating</p>
-                <p className="text-lg font-semibold text-gray-900">{mechanic.rating} ⭐</p>
+                <p className="text-lg font-semibold text-gray-900">{displayUser.rating} ⭐</p>
               </div>
             </div>
 
@@ -140,11 +166,11 @@ export default function TrackServicePage() {
               <div>
                 <p className="text-sm text-gray-600 font-semibold uppercase mb-2">Contact</p>
                 <Button
-                  onClick={() => window.location.href = `tel:${mechanic.phone}`}
+                  onClick={() => window.location.href = `tel:${displayUser.phone}`}
                   className="w-full bg-purple-600 hover:bg-purple-700 text-white"
                 >
                   <Phone className="w-4 h-4 mr-2" />
-                  Call Mechanic
+                  {userType === 'mechanic' ? 'Call Customer' : 'Call Mechanic'}
                 </Button>
               </div>
               <div>
@@ -162,16 +188,18 @@ export default function TrackServicePage() {
 
         {/* Vehicle Info */}
         <Card className="p-6 sm:p-8 border-0 shadow-lg mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Your Vehicle</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-6">
+            {userType === 'mechanic' ? 'Customer Vehicle' : 'Your Vehicle'}
+          </h2>
           
           <div className="grid md:grid-cols-2 gap-6">
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-600 font-semibold uppercase mb-2">Vehicle</p>
-              <p className="text-lg font-semibold text-gray-900">{mechanic.vehicleInfo}</p>
+              <p className="text-lg font-semibold text-gray-900">{displayUser.vehicleInfo}</p>
             </div>
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-600 font-semibold uppercase mb-2">Plate Number</p>
-              <p className="text-lg font-semibold text-gray-900 font-mono">{mechanic.plateNumber}</p>
+              <p className="text-lg font-semibold text-gray-900 font-mono">{displayUser.plateNumber}</p>
             </div>
           </div>
         </Card>

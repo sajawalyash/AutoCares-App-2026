@@ -126,7 +126,7 @@ export default function CustomerSignUp() {
                 </label>
                 <Input
                   {...register('firstName')}
-                  placeholder="John"
+                  placeholder="Sarim"
                   disabled={isLoading}
                 />
                 {errors.firstName && (
@@ -140,7 +140,7 @@ export default function CustomerSignUp() {
                 </label>
                 <Input
                   {...register('lastName')}
-                  placeholder="Doe"
+                  placeholder="Ali"
                   disabled={isLoading}
                 />
                 {errors.lastName && (
@@ -171,7 +171,7 @@ export default function CustomerSignUp() {
               <Input
                 {...register('phoneNumber')}
                 type="tel"
-                placeholder="(555) 123-4567"
+                placeholder="+92317XXXXXXX"
                 disabled={isLoading}
               />
               {errors.phoneNumber && (
