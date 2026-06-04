@@ -207,6 +207,25 @@ export default function MechanicDashboard() {
     router.push('/')
   }
 
+  const handleStatusChange = async (newStatus: string) => {
+    if (!user) return
+    try {
+      setProfile(prev => ({ ...prev, status: newStatus }))
+      const { error } = await supabase
+        .from('mechanics')
+        .update({ status: newStatus })
+        .eq('id', user.id)
+      if (error) {
+        await supabase
+          .from('mechanics')
+          .update({ status: newStatus })
+          .eq('user_id', user.id)
+      }
+    } catch (err) {
+      console.error('Failed to update status', err)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-purple-50">
@@ -401,9 +420,18 @@ export default function MechanicDashboard() {
             Keep your status updated so drivers can request assistance when you are ready.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button className="bg-green-600 hover:bg-green-700">Set Available</Button>
-            <Button variant="outline">Set Busy</Button>
-            <Button variant="outline">Set Offline</Button>
+            <Button 
+              onClick={() => handleStatusChange('Available')}
+              className={profile.status === 'Available' ? "bg-green-600 hover:bg-green-700 text-white" : "bg-gray-200 text-gray-700 hover:bg-green-600 hover:text-white border-0"}
+            >Set Available</Button>
+            <Button 
+              onClick={() => handleStatusChange('Busy')}
+              className={profile.status === 'Busy' ? "bg-yellow-600 hover:bg-yellow-700 text-white" : "bg-gray-200 text-gray-700 hover:bg-yellow-600 hover:text-white border-0"}
+            >Set Busy</Button>
+            <Button 
+              onClick={() => handleStatusChange('Offline')}
+              className={profile.status === 'Offline' ? "bg-red-600 hover:bg-red-700 text-white" : "bg-gray-200 text-gray-700 hover:bg-red-600 hover:text-white border-0"}
+            >Set Offline</Button>
           </div>
         </Card>
       </main>
