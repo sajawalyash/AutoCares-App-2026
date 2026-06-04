@@ -1,23 +1,24 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSessionOrClearToken, supabase } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import {
-  MessageCircle,
-  Wrench,
+  BotMessageSquare,
+  UserCheck,
   MapPin,
-  Phone,
+  ShieldAlert,
   AlertCircle,
   LogOut,
   Settings,
   History,
   Star,
   Home,
+  MessageCircle,
 } from 'lucide-react'
 import { OBDDashboardSummary } from '@/components/obd/obd-dashboard-summary'
 import { EditProfileModal } from '@/components/edit-profile-modal'
@@ -28,12 +29,12 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
-  const loadUser = async () => {
+  const loadUser = useCallback(async () => {
     const session = await getSessionOrClearToken()
     if (session) {
       setUser(session.user)
     }
-  }
+  }, [])
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -146,7 +147,7 @@ export default function Dashboard() {
           {/* AI Chatbot Card */}
           <Link href="/chatbot">
             <Card className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 text-white hover:shadow-lg transition-shadow cursor-pointer h-full">
-              <MessageCircle className="w-12 h-12 mb-4" />
+              <BotMessageSquare className="w-12 h-12 mb-4" />
               <h3 className="text-2xl font-bold mb-2">AI Vehicle Troubleshooting</h3>
               <p className="text-purple-100">
                 Get instant answers to vehicle problems with our AI-powered chatbot
@@ -179,7 +180,7 @@ export default function Dashboard() {
           {/* Find Mechanics */}
           <Link href="/mechanics">
             <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
-              <Wrench className="w-8 h-8 text-purple-600 mb-3" />
+              <UserCheck className="w-8 h-8 text-purple-600 mb-3" />
               <h3 className="font-bold text-gray-900 mb-2">Find Mechanics</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Browse and connect with verified mechanics near you
@@ -220,7 +221,7 @@ export default function Dashboard() {
         <div className="grid md:grid-cols-3 gap-6">
           {/* Emergency SOS */}
           <Card className="p-6 bg-gradient-to-br from-red-500 to-red-600 text-white">
-            <Phone className="w-8 h-8 mb-3" />
+            <ShieldAlert className="w-8 h-8 mb-3" />
             <h3 className="font-bold text-lg mb-2">Emergency SOS</h3>
             <p className="text-sm text-red-100 mb-4">
               One-click emergency assistance

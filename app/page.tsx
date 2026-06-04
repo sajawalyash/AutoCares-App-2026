@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { MessageCircle, Wrench, MapPin, Phone, AlertCircle, Zap, Gauge } from 'lucide-react'
+import { Wrench, Bolt, Cpu, BotMessageSquare, ShieldAlert, MessageCircle, Gauge } from 'lucide-react'
 
 export default function Home() {
   const router = useRouter()
@@ -62,23 +62,31 @@ export default function Home() {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Card className="p-6 bg-white hover:shadow-lg transition-shadow">
-              <MessageCircle className="w-8 h-8 text-purple-500 mb-3" />
+            <Card className="p-6 bg-white hover:shadow-lg transition-shadow flex flex-col items-center text-center">
+              <div className="w-16 h-16 relative mb-4 rounded-full overflow-hidden shadow-sm border border-gray-100">
+                <Image src="/icons/chatbot.png" alt="AI Chatbot" fill className="object-cover" />
+              </div>
               <h3 className="font-semibold text-gray-900">AI Chatbot</h3>
               <p className="text-sm text-gray-600 mt-2">Get instant troubleshooting tips</p>
             </Card>
-            <Card className="p-6 bg-white hover:shadow-lg transition-shadow">
-              <Wrench className="w-8 h-8 text-purple-600 mb-3" />
+            <Card className="p-6 bg-white hover:shadow-lg transition-shadow flex flex-col items-center text-center">
+              <div className="w-16 h-16 relative mb-4 rounded-full overflow-hidden shadow-sm border border-gray-100">
+                <Image src="/icons/mechanic.png" alt="Mechanics" fill className="object-cover" />
+              </div>
               <h3 className="font-semibold text-gray-900">Mechanics</h3>
               <p className="text-sm text-gray-600 mt-2">Find nearby verified mechanics</p>
             </Card>
-            <Card className="p-6 bg-white hover:shadow-lg transition-shadow">
-              <Gauge className="w-8 h-8 text-green-600 mb-3" />
+            <Card className="p-6 bg-white hover:shadow-lg transition-shadow flex flex-col items-center text-center">
+              <div className="w-16 h-16 relative mb-4 rounded-full overflow-hidden shadow-sm border border-gray-100">
+                <Image src="/icons/obd.png" alt="OBD Diagnostics" fill className="object-cover" />
+              </div>
               <h3 className="font-semibold text-gray-900">OBD Diagnostics</h3>
               <p className="text-sm text-gray-600 mt-2">Real-time vehicle health monitoring</p>
             </Card>
-            <Card className="p-6 bg-white hover:shadow-lg transition-shadow">
-              <Phone className="w-8 h-8 text-purple-600 mb-3" />
+            <Card className="p-6 bg-white hover:shadow-lg transition-shadow flex flex-col items-center text-center">
+              <div className="w-16 h-16 relative mb-4 rounded-full overflow-hidden shadow-sm border border-gray-100">
+                <Image src="/icons/sos.png" alt="SOS Button" fill className="object-cover" />
+              </div>
               <h3 className="font-semibold text-gray-900">SOS Button</h3>
               <p className="text-sm text-gray-600 mt-2">Emergency assistance at your fingertips</p>
             </Card>
@@ -93,27 +101,27 @@ export default function Home() {
             Why Choose AutoCares?
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="p-8 border-0 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                <Zap className="w-6 h-6 text-purple-600" />
+            <Card className="p-8 border-0 shadow-md hover:shadow-lg transition-shadow flex flex-col items-center text-center">
+              <div className="w-16 h-16 relative mb-5 rounded-full overflow-hidden shadow-md border-2 border-purple-50">
+                <Image src="/icons/fast-response.png" alt="Fast Response" fill className="object-cover" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Fast Response</h3>
               <p className="text-gray-600">
                 Get connected with mechanics in minutes, not hours. Real-time tracking keeps you informed.
               </p>
             </Card>
-            <Card className="p-8 border-0 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                <MessageCircle className="w-6 h-6 text-purple-500" />
+            <Card className="p-8 border-0 shadow-md hover:shadow-lg transition-shadow flex flex-col items-center text-center">
+              <div className="w-16 h-16 relative mb-5 rounded-full overflow-hidden shadow-md border-2 border-purple-50">
+                <Image src="/icons/chatbot.png" alt="Smart AI Assistant" fill className="object-cover" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Smart AI Assistant</h3>
               <p className="text-gray-600">
                 Our AI chatbot trained on vehicle data and OBD diagnostics helps diagnose issues before calling a mechanic.
               </p>
             </Card>
-            <Card className="p-8 border-0 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                <Gauge className="w-6 h-6 text-green-600" />
+            <Card className="p-8 border-0 shadow-md hover:shadow-lg transition-shadow flex flex-col items-center text-center">
+              <div className="w-16 h-16 relative mb-5 rounded-full overflow-hidden shadow-md border-2 border-purple-50">
+                <Image src="/icons/obd.png" alt="OBD-II Monitoring" fill className="object-cover" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">OBD-II Monitoring</h3>
               <p className="text-gray-600">

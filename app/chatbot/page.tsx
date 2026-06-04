@@ -1,54 +1,83 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import type { User } from '@supabase/supabase-js'
 import { getSessionOrClearToken, supabase } from '@/lib/supabase/client'
 import { getLocalAssistantResponse } from '@/lib/chatbot-engine'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card } from '@/components/ui/card'
-import { ArrowLeft, Send, Loader } from 'lucide-react'
+import {
+  buildChatWelcomeMessage,
+  getUserDisplayName,
+} from '@/lib/user-display-name'
+import {
+  AiChatInterface,
+  type ChatMessage,
+} from '@/components/chatbot/ai-chat-interface'
 
-interface Message {
-  id: string
-  type: 'user' | 'bot'
-  content: string
-  timestamp: Date
-}
+const WELCOME_MESSAGE_ID = 'welcome'
 
 export default function Chatbot() {
   const router = useRouter()
-  const [messages, setMessages] = useState<Message[]>([
+  const [user, setUser] = useState<User | null>(null)
+  const [userName, setUserName] = useState('there')
+  const [authReady, setAuthReady] = useState(false)
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
-      id: '1',
+      id: WELCOME_MESSAGE_ID,
       type: 'bot',
-      content: 'Welcome to AutoCares AI Assistant! I can help with vehicle troubleshooting, OBD diagnostics, and DTC analysis. Ask me about: diagnostic codes, engine issues, vehicle health, overheating, OBD scanners, or connect your vehicle for real-time monitoring. What issue are you experiencing?',
+      content: buildChatWelcomeMessage('there'),
       timestamp: new Date(),
     },
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const session = await getSessionOrClearToken()
-      if (!session) {
-        router.push('/auth/login')
-      }
+  const loadUserContext = useCallback(async () => {
+    const session = await getSessionOrClearToken()
+    if (!session) {
+      router.push('/auth/login')
+      return
     }
-    checkAuth()
+
+    const currentUser = session.user
+    setUser(currentUser)
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('first_name, last_name')
+      .eq('id', currentUser.id)
+      .maybeSingle()
+
+    const displayName = getUserDisplayName(currentUser, profile)
+    setUserName(displayName)
+    setAuthReady(true)
   }, [router])
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    void loadUserContext()
+  }, [loadUserContext])
+
+  useEffect(() => {
+    if (!authReady || userName === 'there') return
+
+    setMessages((prev) => {
+      const welcome = prev.find((m) => m.id === WELCOME_MESSAGE_ID)
+      if (!welcome) return prev
+
+      const personalized = buildChatWelcomeMessage(userName)
+      if (welcome.content === personalized) return prev
+
+      return prev.map((m) =>
+        m.id === WELCOME_MESSAGE_ID ? { ...m, content: personalized } : m,
+      )
+    })
+  }, [authReady, userName])
 
   const handleSendMessage = async () => {
     if (!input.trim() || loading) return
 
     const messageText = input.trim()
-    const userMessage: Message = {
+    const userMessage: ChatMessage = {
       id: Date.now().toString(),
       type: 'user',
       content: messageText,
@@ -65,7 +94,10 @@ export default function Chatbot() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: messageText }),
+        body: JSON.stringify({
+          message: messageText,
+          userName,
+        }),
       })
 
       let ragAnswer = ''
@@ -83,7 +115,7 @@ export default function Chatbot() {
         console.warn('[chatbot] RAG unavailable, using local fallback:', apiError)
       }
 
-      const botResponse: Message = {
+      const botResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
         content: ragAnswer || getLocalAssistantResponse(messageText),
@@ -92,7 +124,7 @@ export default function Chatbot() {
       setMessages((prev) => [...prev, botResponse])
     } catch (error) {
       console.error('[chatbot] Falling back to local response:', error)
-      const botResponse: Message = {
+      const botResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
         content: getLocalAssistantResponse(messageText),
@@ -104,83 +136,24 @@ export default function Chatbot() {
     }
   }
 
+  if (!authReady) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-purple-50 to-white">
+        <div className="size-10 animate-spin rounded-full border-2 border-purple-200 border-t-purple-600" />
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-purple-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
-          <button
-            onClick={() => router.back()}
-            className="p-2 hover:bg-gray-100 rounded-lg transition"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">Vehicle Troubleshooting</h1>
-            <p className="text-sm text-gray-600">AI-Powered Diagnostics</p>
-          </div>
-        </div>
-      </header>
-
-      {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-4 max-w-4xl mx-auto w-full">
-        <div className="space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <Card
-                className={`max-w-xs px-4 py-3 ${
-                  message.type === 'user'
-                    ? 'bg-purple-600 text-white rounded-2xl rounded-tr-none'
-                    : 'bg-gray-100 text-gray-900 rounded-2xl rounded-tl-none'
-                }`}
-              >
-                <p className="text-sm">{message.content}</p>
-              </Card>
-            </div>
-          ))}
-          {loading && (
-            <div className="flex justify-start">
-              <Card className="bg-gray-100 text-gray-900 rounded-2xl rounded-tl-none px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <Loader className="w-4 h-4 animate-spin" />
-                  <span className="text-sm">Thinking...</span>
-                </div>
-              </Card>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
-
-      {/* Input Area */}
-      <div className="bg-white border-t border-gray-200 sticky bottom-0">
-        <div className="max-w-4xl mx-auto p-4">
-          <form onSubmit={(e) => { e.preventDefault(); void handleSendMessage(); }} className="flex gap-3">
-            <Input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              autoComplete="off"
-              placeholder="Describe your vehicle issue..."
-              className="flex-1"
-              disabled={loading}
-            />
-            <Button
-              type="submit"
-              disabled={loading || !input.trim()}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
-          </form>
-          <p className="text-xs text-gray-500 mt-2">
-            💡 Tip: Describe your issue clearly. For urgent help, request roadside assistance from the dashboard.
-          </p>
-        </div>
-      </div>
-    </div>
+    <AiChatInterface
+      userName={userName}
+      userAvatarUrl={user?.user_metadata?.avatar_url ?? null}
+      messages={messages}
+      input={input}
+      loading={loading}
+      onInputChange={setInput}
+      onSend={() => void handleSendMessage()}
+      onBack={() => router.back()}
+    />
   )
 }

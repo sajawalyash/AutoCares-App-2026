@@ -31,8 +31,10 @@ function getRelevantKnowledge(query: string, items: KnowledgeItem[], topN = 3) {
 export async function POST(request: NextRequest) {
   let userMessage = ''
   try {
-    const { message } = await request.json()
+    const { message, userName } = await request.json()
     userMessage = String(message || '')
+    const displayName =
+      typeof userName === 'string' && userName.trim() ? userName.trim() : null
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 })
@@ -61,8 +63,13 @@ Answer: ${item.answer}`
       })
       .join('\n\n')
 
+    const personalization = displayName
+      ? `The user's first name is ${displayName}. Address them naturally by name when it fits (not in every sentence).`
+      : ''
+
     const prompt = `
 ${SYSTEM_PROMPT}
+${personalization}
 
 Retrieved vehicle knowledge base:
 ${context}

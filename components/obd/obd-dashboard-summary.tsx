@@ -10,7 +10,7 @@ import { calculateHealthScore } from '@/lib/obd/utils';
 import { DTC_DATABASE } from '@/lib/obd/utils';
 import type { VehicleData, HealthScoreBreakdown } from '@/lib/obd/types';
 import Link from 'next/link';
-import { Car, AlertTriangle, TrendingUp, Settings } from 'lucide-react';
+import { Cpu, AlertTriangle, TrendingUp, Settings } from 'lucide-react';
 
 interface OBDDashboardSummaryProps {
   userId?: string;
@@ -64,7 +64,7 @@ export function OBDDashboardSummary({ userId }: OBDDashboardSummaryProps) {
       <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Car className="w-5 h-5" />
+            <Cpu className="w-5 h-5" />
             Vehicle Health Monitor
           </CardTitle>
           <CardDescription>Loading vehicle data...</CardDescription>
@@ -84,7 +84,7 @@ export function OBDDashboardSummary({ userId }: OBDDashboardSummaryProps) {
       <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Car className="w-5 h-5" />
+            <Cpu className="w-5 h-5" />
             Vehicle Health Monitor
           </CardTitle>
           <CardDescription>Monitor your vehicle's health in real-time</CardDescription>
@@ -121,7 +121,7 @@ export function OBDDashboardSummary({ userId }: OBDDashboardSummaryProps) {
     <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Car className="w-5 h-5" />
+          <Cpu className="w-5 h-5" />
           Vehicle Health Monitor
         </CardTitle>
         <CardDescription>Real-time vehicle diagnostics</CardDescription>
