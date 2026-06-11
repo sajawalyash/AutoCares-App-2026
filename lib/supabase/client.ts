@@ -3,6 +3,15 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 export const supabase = createSupabaseClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      // Disable background token auto-refresh — it fires every ~20s and
+      // triggers onAuthStateChange events that cause full-page re-renders.
+      // Sessions are refreshed explicitly via getSessionOrClearToken().
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+  }
 )
 
 export function createClient() {
