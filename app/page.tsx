@@ -1,14 +1,9 @@
-'use client'
-
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Wrench, Bolt, Cpu, BotMessageSquare, ShieldAlert, MessageCircle, Gauge } from 'lucide-react'
 
 export default function Home() {
-  const router = useRouter()
-
   return (
     <main className="min-h-screen bg-gradient-to-br from-purple-50 to-purple-50">
       {/* Header */}
@@ -18,19 +13,18 @@ export default function Home() {
             <Image
               src="/autocares-logo.png"
               alt="AutoCares Logo"
-              width={58}
-              height={58}
+              width={48}
+              height={48}
               priority
               className="w-12 h-12 rounded-lg"
             />
             <h1 className="text-2xl font-bold text-gray-900">AutoCares</h1>
           </div>
-          <Button 
-            onClick={() => router.push('/auth/login')}
-            className="bg-purple-600 hover:bg-purple-700"
-          >
-            Login
-          </Button>
+          <Link href="/auth/login">
+            <Button className="bg-purple-600 hover:bg-purple-700">
+              Login
+            </Button>
+          </Link>
         </div>
       </header>
 
@@ -45,20 +39,22 @@ export default function Home() {
               Get instant roadside assistance and AI-powered vehicle troubleshooting. Available 24/7 for cars, bikes, and scooters.
             </p>
             <div className="flex gap-4 flex-col sm:flex-row">
-              <Button 
-                onClick={() => router.push('/auth/register')}
-                size="lg"
-                className="bg-purple-600 hover:bg-purple-700 text-white"
-              >
-                Get Started
-              </Button>
-              <Button 
-                onClick={() => router.push('/auth/login')}
-                size="lg"
-                variant="outline"
-              >
-                Login
-              </Button>
+              <Link href="/auth/register">
+                <Button 
+                  size="lg"
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  Get Started
+                </Button>
+              </Link>
+              <Link href="/auth/login">
+                <Button 
+                  size="lg"
+                  variant="outline"
+                >
+                  Login
+                </Button>
+              </Link>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -141,13 +137,14 @@ export default function Home() {
           <p className="text-xl text-purple-50 mb-8">
             Join thousands of drivers who trust AutoCares for roadside assistance
           </p>
-          <Button 
-            onClick={() => router.push('/auth/signup')}
-            size="lg"
-            className="bg-white text-purple-600 hover:bg-gray-100 font-semibold"
-          >
-            Sign Up Now
-          </Button>
+          <Link href="/auth/signup">
+            <Button 
+              size="lg"
+              className="bg-white text-purple-600 hover:bg-gray-100 font-semibold"
+            >
+              Sign Up Now
+            </Button>
+          </Link>
         </div>
       </section>
 
