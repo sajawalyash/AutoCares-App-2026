@@ -6,10 +6,11 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
 
   if (code) {
-    const supabase = createClient()
+    // ✅ Fix: createClient() is async — must be awaited
+    const supabase = await createClient()
     await supabase.auth.exchangeCodeForSession(code)
   }
 
-  // URL to redirect to after sign in process completes
-  return NextResponse.redirect(new URL('/auth/signup-success', request.url))
+  // ✅ Fix: redirect to login (with verified flag) so all user types land correctly
+  return NextResponse.redirect(new URL('/auth/login?verified=true', request.url))
 }

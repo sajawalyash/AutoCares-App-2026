@@ -47,6 +47,7 @@ export default function SignUp() {
             first_name: formData.firstName,
             phone: formData.phone,
             vehicle_type: formData.vehicleType,
+            user_type: 'customer', // ✅ Fix: required for role-based routing at login
           },
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },

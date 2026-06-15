@@ -137,7 +137,7 @@ export default function Home() {
           <p className="text-xl text-purple-50 mb-8">
             Join thousands of drivers who trust AutoCares for roadside assistance
           </p>
-          <Link href="/auth/signup">
+          <Link href="/auth/register">
             <Button 
               size="lg"
               className="bg-white text-purple-600 hover:bg-gray-100 font-semibold"

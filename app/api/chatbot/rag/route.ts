@@ -31,7 +31,7 @@ function getRelevantKnowledge(query: string, items: KnowledgeItem[], topN = 3) {
 export async function POST(request: NextRequest) {
   let userMessage = ''
   try {
-    const { message, userName } = await request.json()
+    const { message, userName, history } = await request.json()
     userMessage = String(message || '')
     const displayName =
       typeof userName === 'string' && userName.trim() ? userName.trim() : null
@@ -67,6 +67,11 @@ Answer: ${item.answer}`
       ? `The user's first name is ${displayName}. Address them naturally by name when it fits (not in every sentence).`
       : ''
 
+    let historyText = ''
+    if (Array.isArray(history) && history.length > 0) {
+      historyText = 'Previous conversation:\n' + history.map((m: any) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n') + '\n\n'
+    }
+
     const prompt = `
 ${SYSTEM_PROMPT}
 ${personalization}
@@ -74,7 +79,8 @@ ${personalization}
 Retrieved vehicle knowledge base:
 ${context}
 
-Respond to the User's query based on the retrieved knowledge. If not found, use your general knowledge, but prioritize AutoCares guidance.
+${historyText}
+Respond to the User's query based on the retrieved knowledge and previous conversation. If not found, use your general knowledge, but prioritize AutoCares guidance. Provide detailed and clear explanations.
 
 User's query: ${message}
 `

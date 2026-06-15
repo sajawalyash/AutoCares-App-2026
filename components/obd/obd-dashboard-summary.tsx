@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,30 +24,34 @@ export function OBDDashboardSummary({ userId }: OBDDashboardSummaryProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // For now, simulate checking if user has OBD device
-    // In production, this would check the database for obd_connections
+    // ✅ Fix Bug #10: Check localStorage for a per-user OBD connection flag
+    // The /vehicle/connect page sets this flag when a device is paired.
     const checkOBDStatus = async () => {
       try {
-        // Simulate API call to check if user has OBD device
-        // For demo purposes, we will assume they have one and use simulator data
-        setHasOBDDevice(true);
+        const storageKey = userId ? `obd_connected_${userId}` : 'obd_connected'
+        const isConnected = typeof window !== 'undefined'
+          ? localStorage.getItem(storageKey) === 'true'
+          : false
 
-        const simulator = getSimulator();
-        const data = simulator.getVehicleData('device_001');
-        const dtcs = simulator.getActiveDTCs();
+        setHasOBDDevice(isConnected);
 
-        setVehicleData(data);
-        setActiveDTCs(dtcs);
+        if (isConnected) {
+          const simulator = getSimulator();
+          const data = simulator.getVehicleData('device_001');
+          const dtcs = simulator.getActiveDTCs();
 
-        // Calculate health score
-        const databaseDTCs = dtcs.map(code => DTC_DATABASE[code]).filter(Boolean);
-        const score = calculateHealthScore(
-          databaseDTCs,
-          data.coolantTemp,
-          data.fuelLevel,
-          data.engineLoad
-        );
-        setHealthScore(score);
+          setVehicleData(data);
+          setActiveDTCs(dtcs);
+
+          const databaseDTCs = dtcs.map(code => DTC_DATABASE[code]).filter(Boolean);
+          const score = calculateHealthScore(
+            databaseDTCs,
+            data.coolantTemp,
+            data.fuelLevel,
+            data.engineLoad
+          );
+          setHealthScore(score);
+        }
       } catch (error) {
         console.error('Error loading OBD data:', error);
         setHasOBDDevice(false);

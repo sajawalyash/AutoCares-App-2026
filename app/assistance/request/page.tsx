@@ -51,11 +51,23 @@ function RequestAssistanceContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!user) return
     setLoading(true)
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      // ✅ Fix Bug #7: Insert a real service request into Supabase
+      const { error } = await supabase.from('service_requests').insert({
+        customer_id: user.id,
+        problem: formData.problem,
+        location: formData.location,
+        vehicle_info: formData.vehicleInfo,
+        additional_notes: formData.additionalNotes,
+        status: 'pending',
+        mechanic_id: mechanicId || null,
+        created_at: new Date().toISOString(),
+      })
+
+      if (error) throw error
 
       setSubmitted(true)
       setTimeout(() => {

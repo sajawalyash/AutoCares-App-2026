@@ -127,7 +127,7 @@ export default function MechanicSignUp() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  First Name
+                  First Name <span className="text-red-500">*</span>
                 </label>
                 <Input
                   {...register('firstName')}
@@ -141,7 +141,7 @@ export default function MechanicSignUp() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Last Name
+                  Last Name <span className="text-red-500">*</span>
                 </label>
                 <Input
                   {...register('lastName')}
@@ -156,7 +156,7 @@ export default function MechanicSignUp() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Business Name
+                Business Name <span className="text-red-500">*</span>
               </label>
               <Input
                 {...register('businessName')}
@@ -170,7 +170,7 @@ export default function MechanicSignUp() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
+                Email <span className="text-red-500">*</span>
               </label>
               <Input
                 {...register('email')}
@@ -185,7 +185,7 @@ export default function MechanicSignUp() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number
+                Phone Number <span className="text-red-500">*</span>
               </label>
               <Input
                 {...register('phoneNumber')}
@@ -241,7 +241,7 @@ export default function MechanicSignUp() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Password
+                Password <span className="text-red-500">*</span>
               </label>
               <Input
                 {...register('password')}
@@ -259,7 +259,7 @@ export default function MechanicSignUp() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm Password
+                Confirm Password <span className="text-red-500">*</span>
               </label>
               <Input
                 {...register('confirmPassword')}

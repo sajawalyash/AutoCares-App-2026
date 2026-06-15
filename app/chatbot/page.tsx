@@ -97,6 +97,10 @@ export default function Chatbot() {
         body: JSON.stringify({
           message: messageText,
           userName,
+          history: messages.slice(-10).map((m) => ({
+            role: m.type,
+            content: m.content,
+          })),
         }),
       })
 

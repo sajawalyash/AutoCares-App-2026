@@ -1,7 +1,9 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { getSessionOrClearToken } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Users, Wrench, FileText, BarChart3, Settings, LogOut } from 'lucide-react'
@@ -25,7 +27,36 @@ const MOCK_METRICS: AdminMetrics = {
 }
 
 export default function AdminDashboard() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'mechanics' | 'requests' | 'chatbot'>('overview')
+  const [authChecked, setAuthChecked] = useState(false)
+
+  // ✅ Fix Bug #4: Guard admin page — redirect non-admins to login
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const session = await getSessionOrClearToken()
+      if (!session) {
+        router.push('/auth/login')
+        return
+      }
+      const userType = session.user.user_metadata?.user_type
+      if (userType !== 'admin') {
+        // Redirect non-admins to their appropriate dashboard
+        router.push(userType === 'mechanic' ? '/mechanic/dashboard' : '/dashboard')
+        return
+      }
+      setAuthChecked(true)
+    }
+    checkAdmin()
+  }, [router])
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400" />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
