@@ -23,8 +23,8 @@ export default function SignUp() {
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    const { id, value } = e.target
+    setFormData((prev) => ({ ...prev, [id]: value }))
   }
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -90,14 +90,14 @@ export default function SignUp() {
             </div>
           )}
 
-          <form onSubmit={handleSignUp} className="space-y-4">
+          <form onSubmit={(e) => { e.preventDefault(); handleSignUp(e); }} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Full Name
               </label>
               <Input
                 type="text"
-                name="firstName"
+                id="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
                 placeholder="Sarim Ali"
@@ -112,7 +112,7 @@ export default function SignUp() {
               </label>
               <Input
                 type="email"
-                name="email"
+                id="email"
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="you@example.com"
@@ -127,7 +127,7 @@ export default function SignUp() {
               </label>
               <Input
                 type="tel"
-                name="phone"
+                id="phone"
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="+92317XXXXXXX"
@@ -141,7 +141,7 @@ export default function SignUp() {
                 Vehicle Type
               </label>
               <select
-                name="vehicleType"
+                id="vehicleType"
                 value={formData.vehicleType}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
@@ -158,7 +158,7 @@ export default function SignUp() {
               </label>
               <Input
                 type="password"
-                name="password"
+                id="password"
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="••••••••"
@@ -173,7 +173,7 @@ export default function SignUp() {
               </label>
               <Input
                 type="password"
-                name="confirmPassword"
+                id="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="••••••••"

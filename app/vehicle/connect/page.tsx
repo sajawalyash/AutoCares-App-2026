@@ -17,7 +17,7 @@ import {
 } from '@/lib/obd/web-bluetooth';
 import { connectELM327, disconnectELM327 } from '@/lib/obd/elm327';
 
-const VEHICLE_MAKES = ['Toyota', 'Honda', 'Ford', 'BMW', 'Mercedes', 'Audi', 'Volkswagen', 'Hyundai'];
+const VEHICLE_MAKES = ['Toyota', 'Honda', 'Ford', 'BMW', 'Mercedes', 'Audi', 'Volkswagen', 'Hyundai', 'Suzuki'];
 const VEHICLE_YEARS = Array.from({ length: 20 }, (_, i) => new Date().getFullYear() - i);
 
 export default function ConnectVehiclePage() {

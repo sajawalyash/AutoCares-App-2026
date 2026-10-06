@@ -190,7 +190,7 @@ export default function MechanicSignUp() {
               <Input
                 {...register('phoneNumber')}
                 type="tel"
-                placeholder="+92317XXXXXXX"
+                placeholder="03123456789"
                 disabled={isLoading}
               />
               {errors.phoneNumber && (

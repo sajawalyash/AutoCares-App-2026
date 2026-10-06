@@ -17,8 +17,8 @@ const nameSchema = z
 const phoneSchema = z
   .string()
   .regex(
-    /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/,
-    'Invalid phone number format'
+    /^03[0-9]{9}$/,
+    'Phone number must be exactly 11 digits and start with 03'
   )
 
 // Customer signup schema
@@ -29,7 +29,7 @@ export const customerSignupSchema = z.object({
   firstName: nameSchema,
   lastName: nameSchema,
   phoneNumber: phoneSchema,
-  vehicleType: z.string().optional(),
+  vehicleType: z.string().min(1, 'Vehicle type is required'),
   vehicleMake: z.string().optional(),
   vehicleModel: z.string().optional(),
   vehicleYear: z.string().optional(),

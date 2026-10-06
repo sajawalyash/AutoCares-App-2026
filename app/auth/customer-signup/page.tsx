@@ -171,7 +171,7 @@ export default function CustomerSignUp() {
               <Input
                 {...register('phoneNumber')}
                 type="tel"
-                placeholder="+92317XXXXXXX"
+                placeholder="03123456789"
                 disabled={isLoading}
               />
               {errors.phoneNumber && (
@@ -215,13 +215,16 @@ export default function CustomerSignUp() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Vehicle Type <span className="text-gray-400">(optional)</span>
+                  Vehicle Type <span className="text-red-500">*</span>
                 </label>
                 <Input
                   {...register('vehicleType')}
                   placeholder="Car, Truck, Bike"
                   disabled={isLoading}
                 />
+                {errors.vehicleType && (
+                  <p className="text-red-600 text-xs mt-1">{errors.vehicleType.message}</p>
+                )}
               </div>
 
               <div>

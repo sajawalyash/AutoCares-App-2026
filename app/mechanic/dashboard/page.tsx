@@ -204,7 +204,7 @@ export default function MechanicDashboard() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    router.push('/')
+    window.location.href = '/'
   }
 
   const handleStatusChange = async (newStatus: string) => {

@@ -19,8 +19,8 @@ export default function Login() {
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    const { id, value } = e.target
+    setFormData((prev) => ({ ...prev, [id]: value }))
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -36,28 +36,30 @@ export default function Login() {
 
       if (authError) throw authError
 
-      if (data.session) {
-        const user = data.session.user
-        const metadataRole = user.user_metadata?.user_type
+      if (!data.session) {
+        throw new Error('No session returned. Please check your email for a confirmation link or try again.')
+      }
 
-        let userType = metadataRole
+      const user = data.session.user
+      const metadataRole = user.user_metadata?.user_type
 
-        // Fallback to profiles table in case metadata is missing
-        if (!userType) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('user_type')
-            .eq('id', user.id)
-            .single()
+      let userType = metadataRole
 
-          userType = profile?.user_type
-        }
+      // Fallback to profiles table in case metadata is missing
+      if (!userType) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_type')
+          .eq('id', user.id)
+          .single()
 
-        if (userType === 'mechanic') {
-          router.push('/mechanic/dashboard')
-        } else {
-          router.push('/dashboard')
-        }
+        userType = profile?.user_type
+      }
+
+      if (userType === 'mechanic') {
+        router.push('/mechanic/dashboard')
+      } else {
+        router.push('/dashboard')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -91,14 +93,14 @@ export default function Login() {
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={(e) => { e.preventDefault(); handleLogin(e); }} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email
               </label>
               <Input
                 type="email"
-                name="email"
+                id="email"
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="you@example.com"
@@ -113,7 +115,7 @@ export default function Login() {
               </label>
               <Input
                 type="password"
-                name="password"
+                id="password"
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="••••••••"
