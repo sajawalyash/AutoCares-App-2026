@@ -16,6 +16,7 @@ interface Mechanic {
   phone: string
   address: string
   isVerified: boolean
+  distance_km?: number
 }
 
 // Fallback mock data shown when Supabase table is empty or unavailable
@@ -55,8 +56,9 @@ const MOCK_MECHANICS: Mechanic[] = [
 export default function Mechanics() {
   const router = useRouter()
   const [mechanics, setMechanics] = useState<Mechanic[]>([])
-  const [sortBy, setSortBy] = useState<'rating' | 'name'>('rating')
+  const [sortBy, setSortBy] = useState<'rating' | 'name' | 'distance'>('distance')
   const [loadingData, setLoadingData] = useState(true)
+  const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null)
 
   useEffect(() => {
     const init = async () => {
@@ -65,20 +67,53 @@ export default function Mechanics() {
         router.push('/auth/login')
         return
       }
-      await fetchMechanics()
+      
+      // Try to get location first
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+            setUserLocation(loc)
+            fetchMechanics(loc)
+          },
+          (err) => {
+            console.error('Location error:', err)
+            // Fallback to non-location fetch
+            setSortBy('rating')
+            fetchMechanics(null)
+          },
+          { timeout: 5000 }
+        )
+      } else {
+        setSortBy('rating')
+        fetchMechanics(null)
+      }
     }
     init()
   }, [router])
 
-  // ✅ Fix Bug #6: Fetch live data from Supabase mechanics table
-  const fetchMechanics = async () => {
+  // ✅ Fetch live data, using RPC if location is available and sortBy distance
+  const fetchMechanics = async (loc: { lat: number, lng: number } | null) => {
     setLoadingData(true)
     try {
-      const { data, error } = await supabase
-        .from('mechanics')
-        .select('id, business_name, phone, rating, total_reviews, city, state, status, is_verified, specializations')
-        .in('status', ['Available', 'Busy', 'pending'])
-        .order('rating', { ascending: false })
+      let data, error
+
+      if (loc && sortBy === 'distance') {
+        const response = await supabase.rpc('get_nearest_mechanics', {
+          user_lat: loc.lat,
+          user_lon: loc.lng,
+        })
+        data = response.data
+        error = response.error
+      } else {
+        const response = await supabase
+          .from('mechanics')
+          .select('id, business_name, phone, rating, total_reviews, city, state, status, is_verified, specializations')
+          .in('status', ['Available', 'Busy', 'pending'])
+          .order('rating', { ascending: false })
+        data = response.data
+        error = response.error
+      }
 
       if (error) throw error
 
@@ -94,22 +129,36 @@ export default function Mechanics() {
           phone: row.phone || 'N/A',
           address: [row.city, row.state].filter(Boolean).join(', ') || 'Location not provided',
           isVerified: row.is_verified ?? false,
+          distance_km: row.distance_km ? Number(row.distance_km) : undefined,
         }))
         setMechanics(mapped)
       } else {
-        // Fallback to mock data if table is empty
         setMechanics(MOCK_MECHANICS)
       }
     } catch (err) {
-      console.error('Failed to fetch mechanics:', err)
+      console.error('Failed to fetch mechanics:', JSON.stringify(err, null, 2))
       setMechanics(MOCK_MECHANICS)
     } finally {
       setLoadingData(false)
     }
   }
 
+  // Effect to re-fetch when sort changes to/from distance if location is available
+  useEffect(() => {
+    if (!loadingData) {
+      if (sortBy === 'distance' && !userLocation) {
+        setSortBy('rating')
+        alert("Location is required to sort by Nearest")
+        return
+      }
+      fetchMechanics(userLocation)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy])
+
   // ✅ Fix M4: Stale closure bug — sort a snapshot of current mechanics state
   const sortedMechanics = [...mechanics].sort((a, b) => {
+    if (sortBy === 'distance') return 0 // Already sorted by RPC
     if (sortBy === 'rating') return b.rating - a.rating
     return a.name.localeCompare(b.name)
   })
@@ -144,6 +193,16 @@ export default function Mechanics() {
             <div className="flex-1">
               <p className="text-sm font-medium text-gray-700 mb-2">Sort by:</p>
               <div className="flex gap-2">
+                <button
+                  onClick={() => setSortBy('distance')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                    sortBy === 'distance'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Nearest
+                </button>
                 <button
                   onClick={() => setSortBy('rating')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
@@ -223,9 +282,16 @@ export default function Mechanics() {
                     <Phone className="w-4 h-4 text-gray-400" />
                     <span>{mechanic.phone}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-700">
-                    <MapPin className="w-4 h-4 text-gray-400" />
-                    <span>{mechanic.address}</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <MapPin className="w-4 h-4 text-gray-400" />
+                      <span>{mechanic.address}</span>
+                    </div>
+                    {mechanic.distance_km !== undefined && (
+                      <span className="text-sm font-semibold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
+                        {mechanic.distance_km.toFixed(1)} km away
+                      </span>
+                    )}
                   </div>
                 </div>
 

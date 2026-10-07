@@ -24,6 +24,8 @@ export default function MechanicSignUp() {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<MechanicSignupInput>({
     resolver: zodResolver(mechanicSignupSchema),
@@ -48,6 +50,8 @@ export default function MechanicSignUp() {
           lastName: data.lastName,
           phoneNumber: data.phoneNumber,
           businessName: data.businessName,
+          mechanicType: data.mechanicType,
+          cnicNumber: data.cnicNumber,
           specializations: data.specializations || [],
           yearsOfExperience: data.yearsOfExperience || null,
           certifications: data.certifications || [],
@@ -55,6 +59,8 @@ export default function MechanicSignUp() {
           city: data.city || null,
           state: data.state || null,
           zipCode: data.zipCode || null,
+          latitude: data.latitude,
+          longitude: data.longitude,
         }),
       })
 
@@ -170,6 +176,62 @@ export default function MechanicSignUp() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
+                Mechanic Type <span className="text-red-500">*</span>
+              </label>
+              <div className="flex flex-col space-y-2 mt-2">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    value="Car Mechanic"
+                    {...register('mechanicType')}
+                    className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500"
+                    disabled={isLoading}
+                  />
+                  <span className="text-sm text-gray-700">Car Mechanic</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    value="Bike Mechanic"
+                    {...register('mechanicType')}
+                    className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500"
+                    disabled={isLoading}
+                  />
+                  <span className="text-sm text-gray-700">Bike Mechanic</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    value="Both (Car & Bike)"
+                    {...register('mechanicType')}
+                    className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500"
+                    disabled={isLoading}
+                  />
+                  <span className="text-sm text-gray-700">Both (Car & Bike)</span>
+                </label>
+              </div>
+              {errors.mechanicType && (
+                <p className="text-red-600 text-xs mt-1">{errors.mechanicType.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                CNIC Number <span className="text-red-500">*</span>
+              </label>
+              <Input
+                {...register('cnicNumber')}
+                placeholder="13 Digits CNIC Number"
+                disabled={isLoading}
+                maxLength={13}
+              />
+              {errors.cnicNumber && (
+                <p className="text-red-600 text-xs mt-1">{errors.cnicNumber.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email <span className="text-red-500">*</span>
               </label>
               <Input
@@ -219,6 +281,51 @@ export default function MechanicSignUp() {
                   placeholder="Sindh"
                   disabled={isLoading}
                 />
+              </div>
+            </div>
+
+            {/* Hidden Inputs for Geolocation */}
+            <input type="hidden" {...register('latitude', { valueAsNumber: true })} />
+            <input type="hidden" {...register('longitude', { valueAsNumber: true })} />
+            
+            <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
+              <label className="block text-sm font-medium text-purple-900 mb-2">
+                Service Location 📍
+              </label>
+              <p className="text-xs text-purple-700 mb-3">
+                Help customers find you by pinpointing your exact GPS location.
+              </p>
+              <div className="flex items-center justify-between">
+                <div className="text-xs text-gray-600 font-mono">
+                  {watch('latitude') && watch('longitude') ? (
+                    <span className="text-green-600 font-bold">
+                      Location saved! ({watch('latitude')?.toFixed(4)}, {watch('longitude')?.toFixed(4)})
+                    </span>
+                  ) : (
+                    "No location saved"
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="bg-white border-purple-200 text-purple-700 hover:bg-purple-100"
+                  onClick={() => {
+                    if (navigator.geolocation) {
+                      navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                          setValue('latitude', position.coords.latitude, { shouldValidate: true })
+                          setValue('longitude', position.coords.longitude, { shouldValidate: true })
+                        },
+                        (err) => console.error(err)
+                      )
+                    } else {
+                      alert("Geolocation is not supported by your browser.")
+                    }
+                  }}
+                >
+                  Pinpoint Location
+                </Button>
               </div>
             </div>
 

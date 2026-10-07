@@ -62,10 +62,16 @@ export const mechanicSignupSchema = z.object({
     .max(70, 'Years of experience must be realistic')
     .optional(),
   certifications: z.array(z.string()).optional(),
+  mechanicType: z.enum(['Car Mechanic', 'Bike Mechanic', 'Both (Car & Bike)'], {
+    errorMap: () => ({ message: 'Please select a valid mechanic type' }),
+  }),
+  cnicNumber: z.string().regex(/^\d{13}$/, 'CNIC must be exactly 13 digits'),
   address: z.string().optional(),
   city: z.string().optional(),
   state: z.string().optional(),
   zipCode: z.string().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
   agreeToTerms: z.boolean().refine((val) => val === true, {
     message: 'You must agree to the terms and conditions',
   }),

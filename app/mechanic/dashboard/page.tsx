@@ -21,6 +21,7 @@ import {
   User,
 } from 'lucide-react'
 import { EditProfileModal } from '@/components/edit-profile-modal'
+import { IncomingRequestModal, type IncomingRequestData } from '@/components/incoming-request-modal'
 
 type ServiceRequestStatus = 'pending' | 'assigned' | 'on_way' | 'completed'
 
@@ -54,6 +55,7 @@ export default function MechanicDashboard() {
   const [dataError, setDataError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [incomingRequest, setIncomingRequest] = useState<IncomingRequestData | null>(null)
 
   const loadUser = async () => {
     const session = await getSessionOrClearToken()
@@ -202,6 +204,33 @@ export default function MechanicDashboard() {
     checkAuth()
   }, [router])
 
+  // Set up real-time listener for incoming requests
+  useEffect(() => {
+    if (!user) return
+
+    const channel = supabase
+      .channel('mechanic-incoming-requests')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'service_requests',
+          filter: `mechanic_id=eq.${user.id}`,
+        },
+        (payload) => {
+          if (payload.new && payload.new.status === 'pending') {
+            setIncomingRequest(payload.new as IncomingRequestData)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user])
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     window.location.href = '/'
@@ -223,6 +252,40 @@ export default function MechanicDashboard() {
       }
     } catch (err) {
       console.error('Failed to update status', err)
+    }
+  }
+
+  const handleAcceptRequest = async (requestId: string) => {
+    try {
+      const { error } = await supabase
+        .from('service_requests')
+        .update({ status: 'assigned' })
+        .eq('id', requestId)
+      
+      if (error) throw error
+      
+      setIncomingRequest(null)
+      // Redirect to the jobs page so mechanic can start working
+      router.push('/track-service')
+    } catch (error) {
+      console.error('Error accepting request:', error)
+      setDataError('Failed to accept request. Please try again.')
+    }
+  }
+
+  const handleRejectRequest = async (requestId: string) => {
+    try {
+      const { error } = await supabase
+        .from('service_requests')
+        .update({ status: 'rejected' })
+        .eq('id', requestId)
+      
+      if (error) throw error
+      
+      setIncomingRequest(null)
+    } catch (error) {
+      console.error('Error rejecting request:', error)
+      setDataError('Failed to reject request. Please try again.')
     }
   }
 
@@ -478,6 +541,12 @@ export default function MechanicDashboard() {
           onSuccess={loadUser}
         />
       )}
+
+      <IncomingRequestModal
+        request={incomingRequest}
+        onAccept={handleAcceptRequest}
+        onReject={handleRejectRequest}
+      />
     </div>
   )
 }

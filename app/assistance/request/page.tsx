@@ -74,7 +74,7 @@ function RequestAssistanceContent() {
         router.push('/tracking')
       }, 2000)
     } catch (error) {
-      console.error('Error submitting request:', error)
+      console.error('Error submitting request:', JSON.stringify(error, null, 2))
     } finally {
       setLoading(false)
     }
