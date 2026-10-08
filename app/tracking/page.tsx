@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation'
 import { getSessionOrClearToken, supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { ArrowLeft, MapPin, Phone, MessageCircle, CheckCircle, Clock, Loader } from 'lucide-react'
+import { ArrowLeft, MapPin, Phone, MessageCircle, CheckCircle, Clock, Loader, AlertCircle } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface ServiceRequest {
   id: string
-  status: 'pending' | 'assigned' | 'on_way' | 'completed'
+  status: 'pending' | 'assigned' | 'on_way' | 'completed' | 'rejected'
   mechanicName: string
   mechanicPhone: string
   customerName: string
@@ -27,6 +28,7 @@ const statusConfig = {
   assigned: { icon: CheckCircle, label: 'Mechanic Assigned', color: 'text-purple-600', bg: 'bg-purple-50' },
   on_way: { icon: MapPin, label: 'On the Way', color: 'text-purple-600', bg: 'bg-purple-50' },
   completed: { icon: CheckCircle, label: 'Completed', color: 'text-green-600', bg: 'bg-green-50' },
+  rejected: { icon: AlertCircle, label: 'Rejected', color: 'text-red-600', bg: 'bg-red-50' },
 }
 
 export default function Tracking() {
@@ -90,6 +92,51 @@ export default function Tracking() {
     }
     init()
   }, [router])
+
+  useEffect(() => {
+    if (!user) return
+
+    const userType = user.user_metadata?.user_type
+    const column = userType === 'mechanic' ? 'mechanic_id' : 'customer_id'
+
+    const channel = supabase
+      .channel('tracking-requests-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'service_requests',
+          filter: `${column}=eq.${user.id}`,
+        },
+        (payload) => {
+          const newReq = payload.new
+          
+          setRequests((prev) => {
+            const existingReq = prev.find(r => r.id === String(newReq.id))
+            
+            if (existingReq) {
+              if (existingReq.status === 'pending' && newReq.status === 'assigned') {
+                toast.success('Mechanic will be there in just minutes', { duration: 8000 })
+              } else if (existingReq.status === 'pending' && newReq.status === 'rejected') {
+                toast.error('Mechanic has not accepted your request. Kindly request other mechanics.', { duration: 8000 })
+              }
+            }
+
+            return prev.map((req) => 
+              req.id === String(newReq.id) 
+                ? { ...req, status: newReq.status }
+                : req
+            )
+          })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user])
 
   const getStatusProgress = (status: ServiceRequest['status']): number => {
     return { pending: 25, assigned: 50, on_way: 75, completed: 100 }[status]

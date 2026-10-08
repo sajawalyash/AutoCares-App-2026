@@ -67,6 +67,8 @@ export const viewport: Viewport = {
   themeColor: "#0066FF",
 };
 
+import { Toaster } from 'sonner'
+
 export default function RootLayout({
   children,
 }: {
@@ -79,6 +81,7 @@ export default function RootLayout({
       >
         {children}
         <AnalyticsClient />
+        <Toaster richColors position="top-center" />
       </body>
     </html>
   );
