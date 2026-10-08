@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useState, useEffect } from 'react'
+import { Suspense, useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getSessionOrClearToken, supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -19,6 +19,8 @@ function RequestAssistanceContent() {
   const [submitted, setSubmitted] = useState(false)
   const [showMap, setShowMap] = useState(false)
   const [mapCenter, setMapCenter] = useState({ lat: 40.7128, lng: -74.0060 })
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [formData, setFormData] = useState({
     problem: '',
     location: 'Current Location',
@@ -235,14 +237,37 @@ function RequestAssistanceContent() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Upload Photo (Optional)
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-600 transition cursor-pointer">
-                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600">
-                  Click to upload or drag and drop
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  PNG, JPG up to 5MB
-                </p>
+              <input
+                type="file"
+                accept="image/png, image/jpeg"
+                className="hidden"
+                ref={fileInputRef}
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setPhotoFile(e.target.files[0])
+                  }
+                }}
+              />
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-600 transition cursor-pointer"
+              >
+                {photoFile ? (
+                  <div>
+                    <p className="text-sm font-medium text-purple-600">Selected: {photoFile.name}</p>
+                    <p className="text-xs text-gray-500 mt-1">Click to change</p>
+                  </div>
+                ) : (
+                  <>
+                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">
+                      Click to upload or drag and drop
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      PNG, JPG up to 5MB
+                    </p>
+                  </>
+                )}
               </div>
             </div>
 

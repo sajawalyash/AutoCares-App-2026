@@ -20,21 +20,7 @@ interface ServiceRequest {
   createdAt: Date
 }
 
-// Fallback mock data shown when Supabase table is empty or unavailable
-const MOCK_REQUESTS: ServiceRequest[] = [
-  {
-    id: '1',
-    status: 'on_way',
-    mechanicName: "John's Auto Repair",
-    mechanicPhone: '+1 (555) 123-4567',
-    customerName: 'Alice Smith',
-    customerPhone: '+1 (555) 987-6543',
-    estimatedTime: 8,
-    location: '123 Main St',
-    problem: "Engine won't start",
-    createdAt: new Date(Date.now() - 3600000),
-  },
-]
+// Removed mock data
 
 const statusConfig = {
   pending: { icon: Clock, label: 'Pending', color: 'text-yellow-600', bg: 'bg-yellow-50' },
@@ -90,14 +76,14 @@ export default function Tracking() {
           setRequests(mapped)
           if (mapped.length > 0) setExpandedId(mapped[0].id)
         } else {
-          // Fallback to mock data when table is empty
-          setRequests(MOCK_REQUESTS)
-          setExpandedId('1')
+          // No data found, set to empty
+          setRequests([])
+          setExpandedId(null)
         }
       } catch (err) {
         console.error('Failed to load service requests:', err)
-        setRequests(MOCK_REQUESTS)
-        setExpandedId('1')
+        setRequests([])
+        setExpandedId(null)
       } finally {
         setLoading(false)
       }

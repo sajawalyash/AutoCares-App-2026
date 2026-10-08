@@ -19,39 +19,7 @@ interface Mechanic {
   distance_km?: number
 }
 
-// Fallback mock data shown when Supabase table is empty or unavailable
-const MOCK_MECHANICS: Mechanic[] = [
-  {
-    id: 'm1',
-    name: "John's Auto Repair",
-    specialty: 'General Repair & Maintenance',
-    rating: 4.8,
-    reviews: 156,
-    phone: '+1 (555) 123-4567',
-    address: '123 Main St, City',
-    isVerified: true,
-  },
-  {
-    id: 'm2',
-    name: 'Quick Fix Garage',
-    specialty: 'Emergency Services',
-    rating: 4.6,
-    reviews: 89,
-    phone: '+1 (555) 234-5678',
-    address: '456 Oak Ave, City',
-    isVerified: true,
-  },
-  {
-    id: 'm3',
-    name: 'Premium Auto Service',
-    specialty: 'Luxury & Performance',
-    rating: 4.9,
-    reviews: 203,
-    phone: '+1 (555) 345-6789',
-    address: '789 Pine Rd, City',
-    isVerified: true,
-  },
-]
+// Removed mock data
 
 export default function Mechanics() {
   const router = useRouter()
@@ -109,7 +77,6 @@ export default function Mechanics() {
         const response = await supabase
           .from('mechanics')
           .select('id, business_name, phone, rating, total_reviews, city, state, status, is_verified, specializations')
-          .in('status', ['Available', 'Busy', 'pending'])
           .order('rating', { ascending: false })
         data = response.data
         error = response.error
@@ -133,11 +100,11 @@ export default function Mechanics() {
         }))
         setMechanics(mapped)
       } else {
-        setMechanics(MOCK_MECHANICS)
+        setMechanics([])
       }
     } catch (err) {
       console.error('Failed to fetch mechanics:', JSON.stringify(err, null, 2))
-      setMechanics(MOCK_MECHANICS)
+      setMechanics([])
     } finally {
       setLoadingData(false)
     }

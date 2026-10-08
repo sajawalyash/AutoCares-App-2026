@@ -243,15 +243,19 @@ export default function MechanicDashboard() {
       const { error } = await supabase
         .from('mechanics')
         .update({ status: newStatus })
-        .eq('id', user.id)
-      if (error) {
-        await supabase
-          .from('mechanics')
-          .update({ status: newStatus })
-          .eq('user_id', user.id)
+        .or(`id.eq.${user.id},user_id.eq.${user.id}`)
+      
+      if (error) throw error
+      
+      // We check if toast is defined just in case, but sonner should work
+      if (typeof window !== 'undefined' && (window as any).toast) {
+        (window as any).toast.success(`Status updated to ${newStatus}`)
+      } else {
+        alert(`Status updated to ${newStatus}`)
       }
     } catch (err) {
       console.error('Failed to update status', err)
+      alert('Failed to update status')
     }
   }
 
@@ -266,7 +270,7 @@ export default function MechanicDashboard() {
       
       setIncomingRequest(null)
       // Redirect to the jobs page so mechanic can start working
-      router.push('/track-service')
+      router.push('/tracking')
     } catch (error) {
       console.error('Error accepting request:', error)
       setDataError('Failed to accept request. Please try again.')
@@ -420,17 +424,7 @@ export default function MechanicDashboard() {
           </Card>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <Link href="/track-service">
-            <Card className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 text-white hover:shadow-lg transition-shadow cursor-pointer h-full">
-              <Wrench className="w-12 h-12 mb-4" />
-              <h3 className="text-2xl font-bold mb-2">Mechanic Service</h3>
-              <p className="text-purple-100">
-                View and manage live roadside assistance requests from nearby drivers.
-              </p>
-              <div className="mt-4 text-sm">Open Service →</div>
-            </Card>
-          </Link>
+        <div className="grid md:grid-cols-1 gap-6 mb-8">
 
           <Link href="/tracking">
             <Card className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 text-white hover:shadow-lg transition-shadow cursor-pointer h-full">
@@ -508,13 +502,7 @@ export default function MechanicDashboard() {
             <Home className="w-5 h-5 mx-auto" />
             <span className="text-xs mt-1 block">Home</span>
           </button>
-          <button
-            onClick={() => router.push('/track-service')}
-            className="flex-1 py-3 text-center text-gray-600"
-          >
-            <Wrench className="w-5 h-5 mx-auto" />
-            <span className="text-xs mt-1 block">Jobs</span>
-          </button>
+
           <button
             onClick={() => router.push('/history')}
             className="flex-1 py-3 text-center text-gray-600"
