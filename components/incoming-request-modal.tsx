@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { MapPin, AlertCircle, Car, Loader } from 'lucide-react'
+import { playAlertSound } from '@/lib/sound'
 
 export interface IncomingRequestData {
   id: string
@@ -30,11 +31,10 @@ interface IncomingRequestModalProps {
 export function IncomingRequestModal({ request, onAccept, onReject }: IncomingRequestModalProps) {
   const [loadingAction, setLoadingAction] = useState<'accept' | 'reject' | null>(null)
 
-  // Play a sound when a new request arrives
+  // Play synthesized alert chime when a new request arrives
   useEffect(() => {
     if (request) {
-      const audio = new Audio('/notification.mp3') // Assume an audio file exists or will be added
-      audio.play().catch(e => console.log('Audio play blocked:', e))
+      playAlertSound()
     }
   }, [request])
 

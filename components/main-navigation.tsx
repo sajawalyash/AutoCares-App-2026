@@ -23,6 +23,7 @@ import {
   LogOut,
   Menu,
 } from 'lucide-react';
+import { NotificationBell } from '@/components/notifications/notification-bell';
 
 interface MainNavigationProps {
   hasActiveAlerts?: number;
@@ -89,6 +90,9 @@ export function MainNavigation({ hasActiveAlerts = 0, userName = 'User' }: MainN
                 <span className="text-xs font-medium text-red-700">{hasActiveAlerts} Alert</span>
               </div>
             )}
+
+            {/* Notification Bell */}
+            <NotificationBell />
 
             {/* Desktop User Menu */}
             <DropdownMenu>

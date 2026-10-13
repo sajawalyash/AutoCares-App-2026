@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { ArrowLeft, MapPin, Upload, Loader } from 'lucide-react'
 import { CustomGoogleMap } from '@/components/map/google-map'
+import { sendNotification } from '@/lib/notifications'
 
 function RequestAssistanceContent() {
   const router = useRouter()
@@ -28,8 +29,11 @@ function RequestAssistanceContent() {
     additionalNotes: '',
   })
 
+  const [mechanicsList, setMechanicsList] = useState<any[]>([])
+  const [selectedMechanicId, setSelectedMechanicId] = useState<string>(mechanicId || '')
+
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuthAndLoadMechanics = async () => {
       const session = await getSessionOrClearToken()
       if (!session) {
         router.push('/auth/login')
@@ -40,9 +44,22 @@ function RequestAssistanceContent() {
           vehicleInfo: `${session.user?.user_metadata?.vehicle_type || 'Car'}`,
         }))
       }
+
+      // Load active mechanics so customer can select who to notify
+      const { data: mechs } = await supabase
+        .from('mechanics')
+        .select('id, business_name, city, phone')
+        .order('business_name', { ascending: true })
+
+      if (mechs && mechs.length > 0) {
+        setMechanicsList(mechs)
+        if (!mechanicId) {
+          setSelectedMechanicId(mechs[0].id)
+        }
+      }
     }
-    checkAuth()
-  }, [router])
+    checkAuthAndLoadMechanics()
+  }, [router, mechanicId])
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -57,19 +74,42 @@ function RequestAssistanceContent() {
     setLoading(true)
 
     try {
-      // ✅ Fix Bug #7: Insert a real service request into Supabase
-      const { error } = await supabase.from('service_requests').insert({
-        customer_id: user.id,
-        problem: formData.problem,
-        location: formData.location,
-        vehicle_info: formData.vehicleInfo,
-        additional_notes: formData.additionalNotes,
-        status: 'pending',
-        mechanic_id: mechanicId || null,
-        created_at: new Date().toISOString(),
-      })
+      // Resolve target mechanic (from URL, selector, or first available)
+      const targetMechanic = selectedMechanicId || mechanicId || (mechanicsList.length > 0 ? mechanicsList[0].id : null)
+
+      // ✅ Insert a real service request into Supabase
+      const { data: newRequest, error } = await supabase
+        .from('service_requests')
+        .insert({
+          customer_id: user.id,
+          problem: formData.problem,
+          location: formData.location,
+          vehicle_info: formData.vehicleInfo,
+          additional_notes: formData.additionalNotes,
+          status: 'pending',
+          mechanic_id: targetMechanic,
+          created_at: new Date().toISOString(),
+        })
+        .select()
+        .single()
 
       if (error) throw error
+
+      if (targetMechanic) {
+        await sendNotification({
+          userId: targetMechanic,
+          title: 'New Service Request!',
+          message: formData.problem || 'A driver requested roadside assistance nearby.',
+          type: 'service_request',
+          link: '/mechanic/dashboard',
+          metadata: {
+            request_id: newRequest?.id,
+            customer_id: user.id,
+            location: formData.location,
+            vehicle_info: formData.vehicleInfo,
+          },
+        })
+      }
 
       setSubmitted(true)
       setTimeout(() => {
@@ -162,6 +202,29 @@ function RequestAssistanceContent() {
               />
               <p className="text-xs text-gray-500 mt-1">From your profile</p>
             </div>
+
+            {/* Mechanic Selector */}
+            {mechanicsList.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Mechanic to Dispatch *
+                </label>
+                <select
+                  value={selectedMechanicId}
+                  onChange={(e) => setSelectedMechanicId(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent bg-white text-sm font-medium text-gray-800"
+                >
+                  {mechanicsList.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.business_name} {m.city ? `(${m.city})` : ''} {m.phone ? `• ${m.phone}` : ''}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-purple-600 mt-1">
+                  ⚡ This mechanic will receive an instant real-time audio alert & request modal
+                </p>
+              </div>
+            )}
 
             {/* Location */}
             <div>

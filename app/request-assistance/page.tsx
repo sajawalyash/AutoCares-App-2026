@@ -65,7 +65,7 @@ export default function RequestAssistancePage() {
 
       setSubmitted(true)
       setTimeout(() => {
-        router.push('/track-service')
+        router.push('/tracking')
       }, 2000)
     } catch (error) {
       console.error('Error submitting request:', error)
@@ -90,7 +90,7 @@ export default function RequestAssistancePage() {
             <p className="font-semibold">Estimated arrival: 15-30 minutes</p>
           </div>
           <Button 
-            onClick={() => router.push('/track-service')}
+            onClick={() => router.push('/tracking')}
             className="w-full bg-purple-600 hover:bg-purple-700"
           >
             Track Your Mechanic

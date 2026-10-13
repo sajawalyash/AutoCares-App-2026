@@ -6,10 +6,13 @@ import { getSessionOrClearToken, supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
-import { ArrowLeft, LogOut, Bell, Shield, User } from 'lucide-react'
+import { ArrowLeft, LogOut, Bell, Shield, User, Volume2, BellRing } from 'lucide-react'
+import { NotificationBell } from '@/components/notifications/notification-bell'
+import { useNotifications } from '@/context/notification-context'
 
 export default function Profile() {
   const router = useRouter()
+  const { soundEnabled, setSoundEnabled, browserPermission, requestBrowserPermission } = useNotifications()
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -83,14 +86,17 @@ export default function Profile() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-purple-50">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-gray-200">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
-          <button
-            onClick={() => router.back()}
-            className="p-2 hover:bg-gray-100 rounded-lg transition"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <h1 className="text-xl font-bold text-gray-900">My Profile</h1>
+        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.back()}
+              className="p-2 hover:bg-gray-100 rounded-lg transition"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            </button>
+            <h1 className="text-xl font-bold text-gray-900">My Profile</h1>
+          </div>
+          <NotificationBell />
         </div>
       </header>
 
@@ -180,18 +186,52 @@ export default function Profile() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Preferences</h2>
 
           <div className="space-y-4">
-            {/* Notifications */}
+            {/* Notification Sound */}
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-3">
-                <Bell className="w-5 h-5 text-purple-600" />
+                <Volume2 className="w-5 h-5 text-purple-600" />
                 <div>
-                  <p className="font-semibold text-gray-900">Notifications</p>
+                  <p className="font-semibold text-gray-900">Notification Sounds</p>
                   <p className="text-sm text-gray-600">
-                    Receive updates about service requests
+                    Play chime on real-time assistance and status alerts
                   </p>
                 </div>
               </div>
-              <input type="checkbox" defaultChecked className="w-5 h-5" />
+              <input
+                type="checkbox"
+                checked={soundEnabled}
+                onChange={(e) => setSoundEnabled(e.target.checked)}
+                className="w-5 h-5 accent-purple-600 cursor-pointer"
+              />
+            </div>
+
+            {/* Browser Push Notifications */}
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <BellRing className="w-5 h-5 text-purple-600" />
+                <div>
+                  <p className="font-semibold text-gray-900">Desktop Push Notifications</p>
+                  <p className="text-sm text-gray-600">
+                    {browserPermission === 'granted'
+                      ? 'Browser notifications are enabled'
+                      : 'Show system notifications when app is in background'}
+                  </p>
+                </div>
+              </div>
+              {browserPermission === 'granted' ? (
+                <span className="text-xs bg-green-100 text-green-700 font-semibold px-2.5 py-1 rounded-full">
+                  Enabled
+                </span>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={requestBrowserPermission}
+                  className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                >
+                  Enable
+                </Button>
+              )}
             </div>
 
             {/* Privacy */}

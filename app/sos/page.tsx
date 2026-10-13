@@ -79,7 +79,7 @@ export default function SOSPage() {
           <Button
             onClick={() => {
               setCallActive(false)
-              router.push('/track-service')
+              router.push('/tracking')
             }}
             className="w-full bg-purple-600 hover:bg-purple-700 text-white py-6"
           >

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ArrowLeft, MapPin, Phone, MessageCircle, CheckCircle, Clock, Loader, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
+import { NotificationBell } from '@/components/notifications/notification-bell'
 
 interface ServiceRequest {
   id: string
@@ -154,17 +155,22 @@ export default function Tracking() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-purple-50">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
-          <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 rounded-lg transition">
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 rounded-lg transition">
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            </button>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">
+                {user?.user_metadata?.user_type === 'mechanic' ? 'Live Job Tracking' : 'Track Service'}
+              </h1>
+              <p className="text-sm text-gray-600">
+                {user?.user_metadata?.user_type === 'mechanic' ? 'Monitor route progress' : 'Monitor your service requests'}
+              </p>
+            </div>
+          </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">
-              {user?.user_metadata?.user_type === 'mechanic' ? 'Live Job Tracking' : 'Track Service'}
-            </h1>
-            <p className="text-sm text-gray-600">
-              {user?.user_metadata?.user_type === 'mechanic' ? 'Monitor route progress' : 'Monitor your service requests'}
-            </p>
+            <NotificationBell />
           </div>
         </div>
       </header>

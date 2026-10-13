@@ -4,7 +4,9 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getSessionOrClearToken, supabase } from '@/lib/supabase/client'
 import { Card } from '@/components/ui/card'
-import { ArrowLeft, Star, Calendar, Loader } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft, Star, Calendar, Loader, History as HistoryIcon, Wrench } from 'lucide-react'
+import { NotificationBell } from '@/components/notifications/notification-bell'
 
 interface ServiceRecord {
   id: string
@@ -15,19 +17,6 @@ interface ServiceRecord {
   cost: number
   duration: string
 }
-
-// Fallback mock data shown when Supabase table is empty or unavailable
-const MOCK_CUSTOMER_HISTORY: ServiceRecord[] = [
-  { id: '1', date: '2024-03-08', name: "John's Auto Repair", service: 'Engine diagnostics', rating: 5, cost: 85, duration: '1 hour' },
-  { id: '2', date: '2024-02-15', name: 'Quick Fix Garage', service: 'Battery replacement', rating: 4, cost: 120, duration: '45 mins' },
-  { id: '3', date: '2024-01-28', name: 'Premium Auto Service', service: 'Oil change & filter', rating: 5, cost: 65, duration: '30 mins' },
-]
-
-const MOCK_MECHANIC_HISTORY: ServiceRecord[] = [
-  { id: '1', date: '2024-03-08', name: 'Alice Smith', service: 'Engine diagnostics', rating: 5, cost: 85, duration: '1 hour' },
-  { id: '2', date: '2024-02-15', name: 'Bob Johnson', service: 'Battery replacement', rating: 4, cost: 120, duration: '45 mins' },
-  { id: '3', date: '2024-01-28', name: 'Charlie Brown', service: 'Oil change & filter', rating: 5, cost: 65, duration: '30 mins' },
-]
 
 export default function History() {
   const router = useRouter()
@@ -43,40 +32,65 @@ export default function History() {
         return
       }
 
-      const type: 'customer' | 'mechanic' = session.user.user_metadata?.user_type === 'mechanic' ? 'mechanic' : 'customer'
+      const type: 'customer' | 'mechanic' =
+        session.user.user_metadata?.user_type === 'mechanic' ? 'mechanic' : 'customer'
       setUserType(type)
 
-      // ✅ Fix Bug #8: Query real service_history from Supabase
       try {
         const column = type === 'mechanic' ? 'mechanic_id' : 'customer_id'
-        const { data, error } = await supabase
+
+        // 1. First check service_history table
+        const { data: historyRows } = await supabase
           .from('service_history')
           .select('*')
           .eq(column, session.user.id)
           .order('completed_at', { ascending: false })
 
-        if (error) throw error
-
-        if (data && data.length > 0) {
-          const mapped: ServiceRecord[] = data.map((row: any) => ({
+        if (historyRows && historyRows.length > 0) {
+          const mapped: ServiceRecord[] = historyRows.map((row: any) => ({
             id: String(row.id),
             date: row.completed_at ? row.completed_at.split('T')[0] : row.created_at?.split('T')[0] || '',
-            name: type === 'mechanic'
-              ? (row.customer_name || row.customer_id || 'Customer')
-              : (row.mechanic_name || row.mechanic_id || 'Mechanic'),
-            service: row.service || row.service_type || 'Service',
+            name:
+              type === 'mechanic'
+                ? row.customer_name || 'Customer'
+                : row.mechanic_name || row.business_name || 'Mechanic',
+            service: row.service || row.service_type || 'Roadside Assistance',
             rating: Number(row.rating) || 0,
             cost: Number(row.cost) || 0,
             duration: row.duration || '-',
           }))
           setHistoryData(mapped)
+          return
+        }
+
+        // 2. Also check completed service_requests
+        const { data: completedRequests } = await supabase
+          .from('service_requests')
+          .select('*')
+          .eq(column, session.user.id)
+          .eq('status', 'completed')
+          .order('created_at', { ascending: false })
+
+        if (completedRequests && completedRequests.length > 0) {
+          const mapped: ServiceRecord[] = completedRequests.map((row: any) => ({
+            id: String(row.id),
+            date: row.completed_at ? row.completed_at.split('T')[0] : row.created_at?.split('T')[0] || '',
+            name:
+              type === 'mechanic'
+                ? row.customer_name || 'Customer'
+                : row.mechanic_name || 'Assigned Mechanic',
+            service: row.problem || row.problem_description || 'Vehicle Service',
+            rating: Number(row.rating) || 5,
+            cost: Number(row.estimated_cost || row.cost || 0),
+            duration: '30 mins',
+          }))
+          setHistoryData(mapped)
         } else {
-          // Fallback to mock data when table is empty
-          setHistoryData(type === 'mechanic' ? MOCK_MECHANIC_HISTORY : MOCK_CUSTOMER_HISTORY)
+          setHistoryData([])
         }
       } catch (err) {
         console.error('Failed to load history:', err)
-        setHistoryData(type === 'mechanic' ? MOCK_MECHANIC_HISTORY : MOCK_CUSTOMER_HISTORY)
+        setHistoryData([])
       } finally {
         setLoading(false)
       }
@@ -96,58 +110,76 @@ export default function History() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-purple-50">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
-          <button
-            onClick={() => router.back()}
-            className="p-2 hover:bg-gray-100 rounded-lg transition"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <h1 className="text-xl font-bold text-gray-900">
-            {userType === 'mechanic' ? 'Job History' : 'Service History'}
-          </h1>
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.back()}
+              className="p-2 hover:bg-gray-100 rounded-lg transition"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            </button>
+            <h1 className="text-xl font-bold text-gray-900">
+              {userType === 'mechanic' ? 'Job History' : 'Service History'}
+            </h1>
+          </div>
+          <NotificationBell />
         </div>
       </header>
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 py-8">
         {historyData.length === 0 ? (
-          <div className="text-center py-20 text-gray-500">
-            <p className="text-lg font-medium">No history yet</p>
-            <p className="text-sm mt-1">Completed services will appear here.</p>
-          </div>
+          <Card className="p-12 text-center border-dashed">
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 text-purple-600">
+              <HistoryIcon className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">No Service History Yet</h3>
+            <p className="text-sm text-gray-600 max-w-sm mx-auto mb-6">
+              {userType === 'mechanic'
+                ? 'Your completed jobs and earnings will appear here once you finish service calls.'
+                : 'Your completed roadside assistance and maintenance records will be displayed here.'}
+            </p>
+            <Button
+              onClick={() =>
+                router.push(userType === 'mechanic' ? '/mechanic/dashboard' : '/assistance/request')
+              }
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              {userType === 'mechanic' ? 'View Mechanic Dashboard' : 'Request Assistance'}
+            </Button>
+          </Card>
         ) : (
           <div className="space-y-4">
-            {historyData.map((record) => (
-              <Card key={record.id} className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="font-bold text-gray-900">{record.name}</h3>
-                    <p className="text-sm text-gray-600">{record.service}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center gap-1 justify-end mb-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < record.rating
-                              ? 'fill-yellow-400 text-yellow-400'
-                              : 'text-gray-300'
-                          }`}
-                        />
-                      ))}
+            {historyData.map((item) => (
+              <Card key={item.id} className="p-6 hover:shadow-md transition">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="p-2 bg-purple-100 rounded-lg text-purple-600">
+                        <Wrench className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-gray-900">{item.name}</h3>
+                        <p className="text-sm text-gray-600">{item.service}</p>
+                      </div>
                     </div>
-                    <p className="font-semibold text-gray-900">Rs {record.cost}</p>
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    {record.date ? new Date(record.date).toLocaleDateString() : '—'}
+                    <div className="flex items-center gap-4 text-xs text-gray-500 mt-3">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>{item.date || 'Recent'}</span>
+                      </div>
+                      {item.duration !== '-' && <span>Duration: {item.duration}</span>}
+                      {item.cost > 0 && <span className="font-semibold text-gray-700">Cost: Rs {item.cost}</span>}
+                    </div>
                   </div>
-                  <div>{record.duration}</div>
+
+                  {item.rating > 0 && (
+                    <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded border border-yellow-200">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <span className="text-xs font-bold text-yellow-700">{item.rating}</span>
+                    </div>
+                  )}
                 </div>
               </Card>
             ))}

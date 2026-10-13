@@ -68,6 +68,7 @@ export const viewport: Viewport = {
 };
 
 import { Toaster } from 'sonner'
+import { NotificationProvider } from '@/context/notification-context'
 
 export default function RootLayout({
   children,
@@ -79,9 +80,11 @@ export default function RootLayout({
       <body
         className={`${geist.variable} ${geistMono.variable} font-sans antialiased`}
       >
-        {children}
-        <AnalyticsClient />
-        <Toaster richColors position="top-center" />
+        <NotificationProvider>
+          {children}
+          <AnalyticsClient />
+          <Toaster richColors position="top-right" />
+        </NotificationProvider>
       </body>
     </html>
   );
